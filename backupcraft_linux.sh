@@ -11,6 +11,15 @@ GREEN='\033[0;32m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color (reset)
 
+# Caminho do arquivo de log
+LOG_FILE="$HOME/.backupcraft_log"
+
+# Função de log
+log_action() {
+  local message="$1"
+  echo "[$(date +"%d/%m/%Y %H:%M:%S")] $message" >> "$LOG_FILE"
+}
+
 # Função para carregar configurações
 load_config() {
   if [[ ! -f "$CONFIG_FILE" ]]; then
@@ -58,6 +67,33 @@ list_backups() {
   done
 }
 
+# Inicia animação de loading em segundo plano e guarda o PID
+start_loading() {
+  local chars='|/-\'
+  while :; do
+    for ((i=0; i<${#chars}; i++)); do
+      echo -ne "\r${chars:$i:1}"  # barra giratória
+      sleep 0.1
+    done
+  done
+}
+
+# Inicia a animação e salva o PID em uma variável global
+animate_loading() {
+  start_loading &
+  LOADING_PID=$!
+  disown
+}
+
+# Para a animação
+stop_loading() {
+  kill "$LOADING_PID" 2>/dev/null
+  wait "$LOADING_PID" 2>/dev/null
+  echo -ne "\r"  # limpa a linha
+}
+
+
+
 # Configurações
 config_menu() {
   while true; do
@@ -90,27 +126,35 @@ backup_world() {
     [[ -n "$world" ]] && break
   done
   [[ -z "$world" ]] && return
+
   local src="$SAVE_DIR/$world"
   local dest_dir="$BACKUP_DIR/$world"
-  mkdir -p "$dest_dir"
-  mkdir -p "$HIDDEN_BACKUP_DIR/$world"
-
+  local hidden_dest="$HIDDEN_BACKUP_DIR/$world"
   local timestamp=$(date +"%d-%m-%Y_%H-%M-%S")
   local zipname="${world}_$timestamp.zip"
   local zip_single="${world}.zip"
 
+  echo -e "${GREEN}[✔] Mundo selecionado:${NC} $world"
+  echo -n "[...] Criando diretórios de destino... "
+  mkdir -p "$dest_dir" && mkdir -p "$hidden_dest"
+  echo -e "${GREEN}OK${NC}"
+
+  echo -n "[...] Compactando mundo..."
+  animate_loading & pid=$!
   if [[ "$MULTIPLE_BACKUPS" == "true" ]]; then
     (cd "$SAVE_DIR" && zip -rq "$dest_dir/$zipname" "$world")
-    [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && (cd "$SAVE_DIR" && zip -rq "$HIDDEN_BACKUP_DIR/$world/$zipname" "$world")
+    [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && (cd "$SAVE_DIR" && zip -rq "$hidden_dest/$zipname" "$world")
   else
-    rm -f "$dest_dir"/*.zip "$HIDDEN_BACKUP_DIR/$world"/*.zip
+    rm -f "$dest_dir"/*.zip "$hidden_dest"/*.zip
     (cd "$SAVE_DIR" && zip -rq "$dest_dir/$zip_single" "$world")
-    [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && (cd "$SAVE_DIR" && zip -rq "$HIDDEN_BACKUP_DIR/$world/$zip_single" "$world")
+    [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && (cd "$SAVE_DIR" && zip -rq "$hidden_dest/$zip_single" "$world")
   fi
+  kill $pid >/dev/null 2>&1 && wait $pid 2>/dev/null
+  echo -e "\r[✔] Backup finalizado para '$world'."
 
-  echo "Backup criado para '$world'."
   read -p "Pressione Enter para continuar..."
 }
+
 
 # Restaurar
 restore_backup() {
@@ -141,14 +185,14 @@ restore_backup() {
     [[ "$confirm" != "s" ]] && return
     rm -rf "$original_path"
     unzip -oq "$zipfile" -d "$SAVE_DIR"
-    echo "Backup restaurado substituindo '$world_name'."
+    log_action "Backup restaurado: '$zipfile' → '$original_path' (Substituído)"
+
   else
     rm -rf "$new_world_path"
     local tmp=$(mktemp -d)
     unzip -q "$zipfile" -d "$tmp"
     mv "$tmp/$world_name" "$new_world_path" 2>/dev/null || echo "Falha ao mover arquivos."
-    rmdir "$tmp" 2>/dev/null
-    echo "Backup restaurado como '$new_world_path'."
+    log_action "Backup restaurado: '$zipfile' → '$new_world_path' (Novo mundo)"
   fi
   read -p "Pressione Enter para continuar..."
 }
