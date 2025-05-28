@@ -2,8 +2,14 @@
 
 # Caminhos
 SAVE_DIR="$HOME/.minecraft/saves"
-BACKUP_DIR="$HOME/Documents/Backup Save Minecraft"
+BACKUP_DIR="$(xdg-user-dir DOCUMENTS)/Backup Save Minecraft"
+HIDDEN_BACKUP_DIR="$HOME/.local/share/.backupcraft_hidden"
 CONFIG_FILE="$HOME/.backupcraft_config"
+
+# Cores
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color (reset)
 
 # Função para carregar configurações
 load_config() {
@@ -11,15 +17,19 @@ load_config() {
     echo "MULTIPLE_BACKUPS=true" > "$CONFIG_FILE"
     echo "REPLACE_ON_RESTORE=false" >> "$CONFIG_FILE"
     echo "IGNORE_BACKUP_WORLD=true" >> "$CONFIG_FILE"
+    echo "ENABLE_HIDDEN_BACKUP=true" >> "$CONFIG_FILE"
   fi
   source "$CONFIG_FILE"
 }
 
 # Função para salvar configurações
 save_config() {
-  echo "MULTIPLE_BACKUPS=$MULTIPLE_BACKUPS" > "$CONFIG_FILE"
-  echo "REPLACE_ON_RESTORE=$REPLACE_ON_RESTORE" >> "$CONFIG_FILE"
-  echo "IGNORE_BACKUP_WORLD=$IGNORE_BACKUP_WORLD" >> "$CONFIG_FILE"
+  {
+    echo "MULTIPLE_BACKUPS=$MULTIPLE_BACKUPS"
+    echo "REPLACE_ON_RESTORE=$REPLACE_ON_RESTORE"
+    echo "IGNORE_BACKUP_WORLD=$IGNORE_BACKUP_WORLD"
+    echo "ENABLE_HIDDEN_BACKUP=$ENABLE_HIDDEN_BACKUP"
+  } > "$CONFIG_FILE"
 }
 
 # Verifica se a pasta parece ser um mundo válido
@@ -27,7 +37,7 @@ is_valid_world() {
   [[ -d "$1" && -f "$1/level.dat" ]]
 }
 
-# Lista mundos válidos, ignorando backups se configurado
+# Lista mundos válidos
 list_worlds() {
   for d in "$SAVE_DIR"/*; do
     if is_valid_world "$d"; then
@@ -39,105 +49,109 @@ list_worlds() {
   done
 }
 
-# Lista backups disponíveis
+# Lista backups
 list_backups() {
   for d in "$BACKUP_DIR"/*; do
-    # Assumindo backup é pasta que contém pelo menos 1 zip
     if [[ -d "$d" && -n "$(find "$d" -maxdepth 1 -name '*.zip' -print -quit)" ]]; then
       echo "$(basename "$d")"
     fi
   done
 }
 
-# Menu de configurações
+# Configurações
 config_menu() {
-  clear
-  echo "===== Configurações ====="
-  echo "[1] Criar várias versões do backup: $MULTIPLE_BACKUPS"
-  echo "[2] Substituir mundo ao restaurar: $REPLACE_ON_RESTORE"
-  echo "[3] Ignorar backups restaurados de mundos (com sufixo '(BackupCraft)'): $IGNORE_BACKUP_WORLD"
-  echo "[4] Voltar"
-  read -p "Escolha: " opt
-  case $opt in
-    1) MULTIPLE_BACKUPS=$( [[ "$MULTIPLE_BACKUPS" == "true" ]] && echo "false" || echo "true" ); save_config; config_menu;;
-    2) REPLACE_ON_RESTORE=$( [[ "$REPLACE_ON_RESTORE" == "true" ]] && echo "false" || echo "true" ); save_config; config_menu;;
-    3) IGNORE_BACKUP_WORLD=$( [[ "$IGNORE_BACKUP_WORLD" == "true" ]] && echo "false" || echo "true" ); save_config; config_menu;;
-    *) return;;
-  esac
+  while true; do
+    clear
+    echo "===== Configurações ====="
+    echo "[1] Backups versionados: $( [[ "$MULTIPLE_BACKUPS" == "true" ]] && echo -e "${GREEN}Ativado${NC}" || echo -e "${RED}Desativado${NC}" )"
+    echo "[2] Substituir mundo ao restaurar: $( [[ "$REPLACE_ON_RESTORE" == "true" ]] && echo -e "${GREEN}Ativado${NC}" || echo -e "${RED}Desativado${NC}" )"
+    echo "[3] Ignorar mundos restaurados (com o sufixo 'BackupCraft'): $( [[ "$IGNORE_BACKUP_WORLD" == "true" ]] && echo -e "${GREEN}Ativado${NC}" || echo -e "${RED}Desativado${NC}" )"
+    echo "[4] Backup oculto extra (medida de segurança): $( [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && echo -e "${GREEN}Ativado${NC}" || echo -e "${RED}Desativado${NC}" )"
+    echo "[5] Voltar"
+    read -p "Escolha: " opt
+    case $opt in
+      1) MULTIPLE_BACKUPS=$([[ "$MULTIPLE_BACKUPS" == "true" ]] && echo "false" || echo "true");;
+      2) REPLACE_ON_RESTORE=$([[ "$REPLACE_ON_RESTORE" == "true" ]] && echo "false" || echo "true");;
+      3) IGNORE_BACKUP_WORLD=$([[ "$IGNORE_BACKUP_WORLD" == "true" ]] && echo "false" || echo "true");;
+      4) ENABLE_HIDDEN_BACKUP=$([[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && echo "false" || echo "true");;
+      5) save_config; return;;
+      *) echo "Opção inválida.";;
+    esac
+    save_config
+  done
 }
 
-# Faz backup de um mundo
+# Backup
 backup_world() {
   mapfile -t worlds < <(list_worlds)
-
   echo "===== Mundos Disponíveis ====="
-  select world in "${worlds[@]}"; do
+  select world in "${worlds[@]}" "Voltar"; do
+    [[ "$REPLY" == "${#worlds[@]}+1" || "$world" == "Voltar" ]] && return
     [[ -n "$world" ]] && break
   done
+  [[ -z "$world" ]] && return
   local src="$SAVE_DIR/$world"
   local dest_dir="$BACKUP_DIR/$world"
   mkdir -p "$dest_dir"
+  mkdir -p "$HIDDEN_BACKUP_DIR/$world"
+
+  local timestamp=$(date +"%d-%m-%Y_%H-%M-%S")
+  local zipname="${world}_$timestamp.zip"
+  local zip_single="${world}.zip"
 
   if [[ "$MULTIPLE_BACKUPS" == "true" ]]; then
-    local timestamp=$(date +"%d-%m-%Y_%H-%M-%S")
-    (cd "$SAVE_DIR" && zip -r "$dest_dir/${world}_$timestamp.zip" "$world" > /dev/null)
+    (cd "$SAVE_DIR" && zip -rq "$dest_dir/$zipname" "$world")
+    [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && (cd "$SAVE_DIR" && zip -rq "$HIDDEN_BACKUP_DIR/$world/$zipname" "$world")
   else
-    rm -f "$dest_dir"/*.zip
-    (cd "$SAVE_DIR" && zip -r "$dest_dir/${world}.zip" "$world" > /dev/null)
+    rm -f "$dest_dir"/*.zip "$HIDDEN_BACKUP_DIR/$world"/*.zip
+    (cd "$SAVE_DIR" && zip -rq "$dest_dir/$zip_single" "$world")
+    [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && (cd "$SAVE_DIR" && zip -rq "$HIDDEN_BACKUP_DIR/$world/$zip_single" "$world")
   fi
 
   echo "Backup criado para '$world'."
   read -p "Pressione Enter para continuar..."
 }
 
-# Restaura um backup
+# Restaurar
 restore_backup() {
   IFS=$'\n' read -r -d '' -a backups < <(list_backups && printf '\0')
   echo "===== Backups Disponíveis ====="
-  select backup in "${backups[@]}"; do
+  select backup in "${backups[@]}" "Voltar"; do
+    [[ "$backup" == "Voltar" || "$REPLY" == "${#backups[@]}+1" ]] && return
     [[ -n "$backup" ]] && break
   done
+  [[ -z "$backup" ]] && return
 
   local backup_folder="$BACKUP_DIR/$backup"
   local zipfile=$(find "$backup_folder" -name '*.zip' | sort | tail -n1)
 
-  # Nome original do mundo no backup (extraído do nome do zip)
-  local base_name=$(basename "$zipfile" .zip)
-  # Remove possível timestamp, deixando só nome do mundo (considerando que o nome do zip é "nome_timestamp.zip" ou "nome.zip")
-  local world_name="${base_name%%_*}"  # pega até o primeiro _
-
-  # Caminho do mundo original e o destino
-  local original_world_path="$SAVE_DIR/$world_name"
-  local new_world_name="${world_name} (BackupCraft)"
-  local new_world_path="$SAVE_DIR/$new_world_name"
-
-  if [[ "$REPLACE_ON_RESTORE" == "true" ]]; then
-    # Apaga o mundo original (pra evitar mistura)
-    rm -rf "$original_world_path"
-    # Descompacta direto na pasta de saves, vai criar "$world_name"
-    unzip -oq "$zipfile" -d "$SAVE_DIR"
-    echo "Backup de '$world_name' restaurado substituindo o mundo original."
-  else
-    # Se existir a pasta renomeada, apaga antes pra evitar confusão
-    rm -rf "$new_world_path"
-
-    # Cria uma pasta temporária pra descompactar
-    local tmp_dir=$(mktemp -d)
-    unzip -q "$zipfile" -d "$tmp_dir"
-
-    # A pasta dentro do zip tem o nome original do mundo
-    # Move ela para a pasta de saves, renomeando
-    mv "$tmp_dir/$world_name" "$new_world_path"
-
-    # Remove a pasta temporária
-    rmdir "$tmp_dir"
-
-    echo "Backup de '$world_name' restaurado como '$new_world_name'."
+  if [[ ! -f "$zipfile" ]]; then
+    echo "Backup inválido ou corrompido."
+    read -p "Pressione Enter para continuar..."
+    return
   fi
 
+  local base_name=$(basename "$zipfile" .zip)
+  local world_name="${base_name%%_*}"
+  local original_path="$SAVE_DIR/$world_name"
+  local new_world_path="$SAVE_DIR/${world_name} (BackupCraft)"
+
+  if [[ "$REPLACE_ON_RESTORE" == "true" ]]; then
+    read -p "Deseja substituir o mundo original '$world_name'? (s/N): " confirm
+    [[ "$confirm" != "s" ]] && return
+    rm -rf "$original_path"
+    unzip -oq "$zipfile" -d "$SAVE_DIR"
+    echo "Backup restaurado substituindo '$world_name'."
+  else
+    rm -rf "$new_world_path"
+    local tmp=$(mktemp -d)
+    unzip -q "$zipfile" -d "$tmp"
+    mv "$tmp/$world_name" "$new_world_path" 2>/dev/null || echo "Falha ao mover arquivos."
+    rmdir "$tmp" 2>/dev/null
+    echo "Backup restaurado como '$new_world_path'."
+  fi
   read -p "Pressione Enter para continuar..."
 }
-
 
 # Menu principal
 main_menu() {
@@ -145,17 +159,17 @@ main_menu() {
   while true; do
     clear
     echo "===== Bem-vindo ao BackupCraft! ====="
-    echo "[1] Fazer backup"
-    echo "[2] Carregar um backup"
+    echo "[1] Fazer Backup"
+    echo "[2] Restaurar Backup"
     echo "[3] Configurações"
     echo "[4] Sair"
-    read -p "Escolha: " opt
-    case $opt in
-      1) backup_world;;
-      2) restore_backup;;
-      3) config_menu;;
-      4) exit;;
-      *) echo "Opção inválida."; sleep 1;;
+    read -p "Escolha uma opção: " op
+    case $op in
+      1) backup_world ;;
+      2) restore_backup ;;
+      3) config_menu ;;
+      4) clear; exit ;;
+      *) echo "Opção inválida."; sleep 1 ;;
     esac
   done
 }
