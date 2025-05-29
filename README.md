@@ -19,6 +19,8 @@ BackupCraft é um programa de backup leve e rápido para mundos do Minecraft. Co
    - [3] Configurações
    - [4] Sair
 
+Por exemplo: se quiser criar um backup, terá que digitar `1`. Se quiser restaurar um backup, terá que digitar `2`. E por aí vai.
+
 ## Por que usar o BackupCraft ao invés do sistema nativo do Minecraft?
 
 O Minecraft possui sim uma função de backup, mas ela é limitada e mais lenta. Veja o que o BackupCraft faz melhor:
@@ -40,7 +42,7 @@ O Minecraft possui sim uma função de backup, mas ela é limitada e mais lenta.
 
 # ⚙️ Configurações do Script de Backup
 
-Para entrar nas configurações, basta digitar "3" no menu principal e depois `Enter`.
+Para entrar nas configurações, basta digitar `3` no menu principal e depois `Enter`.
 
 Este script utiliza um arquivo `backup_config.txt` para personalizar seu comportamento. Abaixo está a explicação de cada configuração e o que acontece ao ativá-la ou desativá-la.
 
