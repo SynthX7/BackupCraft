@@ -69,7 +69,6 @@ list_backups() {
 
 # Inicia animação de loading em segundo plano e guarda o PID
 
-
 # Inicia a animação e salva o PID em uma variável global
 animate_loading() {
   start_loading &
