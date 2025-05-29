@@ -40,31 +40,33 @@ O Minecraft possui sim uma função de backup, mas ela é limitada e mais lenta.
 - Precisa saber o mínimo de como usar o terminal.
 - Mas isso será resolvido em breve com uma **interface gráfica em Python**, que tornará o uso simples até pra quem nunca usou Linux antes.
 
-# ⚙️ Configurações do Script de Backup
+# ⚙️ Explicação das configurações do programa
 
 Para entrar nas configurações, basta digitar `3` no menu principal e depois `Enter`.
 
-Este script utiliza um arquivo `backup_config.txt` para personalizar seu comportamento. Abaixo está a explicação de cada configuração e o que acontece ao ativá-la ou desativá-la.
-
 ---
 
-## Parâmetros disponíveis
+1. **Backups versionados**  
+   - ✅ **Ativado:** Mantém várias versões do backup com datas para restaurar estados anteriores.  
+   - ❌ **Desativado:** Só mantém o backup mais recente, substituindo versões anteriores.
 
-| Configuração              | Opções            | Descrição                                                                 |
-|--------------------------|-------------------|---------------------------------------------------------------------------|
-| `MULTIPLE_BACKUPS`       | `true` ou `false` | `true`: Cria um novo backup com data/hora a cada vez.<br>`false`: Mantém apenas um backup por mundo, sobrescrevendo o anterior. |
-| `ENABLE_HIDDEN_BACKUP`   | `true` ou `false` | `true`: Cria uma cópia oculta de segurança na pasta `.backup_escondido`.<br>`false`: Não cria essa cópia. |
-| `USE_ADVANCED_SORT`      | `true` ou `false` | `true`: Usa uma ordenação mais avançada e intuitiva dos backups.<br>`false`: Usa ordenação alfabética simples. |
-| `DELETE_EMPTY_BACKUPS`   | `true` ou `false` | `true`: Apaga backups vazios ou corrompidos automaticamente.<br>`false`: Mantém arquivos vazios no disco. |
-| `SHOW_BACKUP_COUNT`      | `true` ou `false` | `true`: Mostra quantos backups existem por mundo antes de restaurar.<br>`false`: Não mostra essa informação. |
-| `SHOW_RESTORE_COUNT`     | `true` ou `false` | `true`: Exibe quantas restaurações foram feitas com sucesso.<br>`false`: Não exibe esse contador. |
-| `ALLOW_MANUAL_RESTORE`   | `true` ou `false` | `true`: Permite escolher manualmente qual backup restaurar.<br>`false`: Restaura automaticamente o mais recente. |
+2. **Substituir mundo ao restaurar**  
+   - ✅ **Ativado:** O mundo atual é substituído automaticamente pelo backup restaurado.  
+   - ❌ **Desativado:** O backup é restaurado com um sufixo "(BackupCraft)", sem substituir o mundo atual.
+
+3. **Ignorar mundos restaurados (com sufixo '(BackupCraft)')**  
+   - ✅ **Ativado:** Ignora mundos com sufixo "(BackupCraft)" que estão dentro da pasta "saves".  
+   - ❌ **Desativado:** Considera todos os mundos, incluindo os já restaurados.
+
+4. **Backup oculto extra**  
+   - ✅ **Ativado:** Cria um backup extra em local oculto para maior segurança.  
+   - ❌ **Desativado:** Apenas o backup principal é criado, sem cópia adicional.
 
 ---
 
 ## Observações
 
-- O arquivo `backup_config.txt` será criado automaticamente na primeira execução do script, com valores padrão.
+- O arquivo `backup_config.txt` será criado automaticamente na primeira execução do script, com valores padrões (só altere se souber o que está fazendo).
 - Todas as opções devem ser escritas em minúsculas (`true` ou `false`), sem aspas.
 
 
