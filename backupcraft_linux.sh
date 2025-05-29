@@ -25,7 +25,7 @@ load_config() {
   if [[ ! -f "$CONFIG_FILE" ]]; then
     echo "MULTIPLE_BACKUPS=true" > "$CONFIG_FILE"
     echo "REPLACE_ON_RESTORE=false" >> "$CONFIG_FILE"
-    echo "IGNORE_BACKUP_WORLD=true" >> "$CONFIG_FILE"
+    echo "IGNORE_BACKUP_WORLD=false" >> "$CONFIG_FILE"
     echo "ENABLE_HIDDEN_BACKUP=true" >> "$CONFIG_FILE"
   fi
   source "$CONFIG_FILE"
@@ -68,15 +68,7 @@ list_backups() {
 }
 
 # Inicia animação de loading em segundo plano e guarda o PID
-start_loading() {
-  local chars='|/-\'
-  while :; do
-    for ((i=0; i<${#chars}; i++)); do
-      echo -ne "\r${chars:$i:1}"  # barra giratória
-      sleep 0.1
-    done
-  done
-}
+
 
 # Inicia a animação e salva o PID em uma variável global
 animate_loading() {
