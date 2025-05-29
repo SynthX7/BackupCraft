@@ -83,8 +83,6 @@ stop_loading() {
   echo -ne "\r"  # limpa a linha
 }
 
-
-
 # Configurações
 config_menu() {
   while true; do
