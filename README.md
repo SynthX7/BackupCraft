@@ -8,7 +8,7 @@ BackupCraft é um programa de backup leve e rápido para mundos do Minecraft. Co
 > ```
 
 ## Como usar
-1. Coloque o script `backupcraft.sh` no mesmo diretório do seu mundo do Minecraft (ou edite o caminho dentro do script).
+1. Coloque o script `backupcraft.sh` em qualquer diretório de sua preferência, é recomendável na pasta principal do seu usuário (/home/seunome).
 2. Abra o terminal e execute o script:
    ```bash
    ./backupcraft.sh
