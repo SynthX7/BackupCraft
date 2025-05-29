@@ -13,11 +13,11 @@ BackupCraft é um programa de backup leve e rápido para mundos do Minecraft. Co
    ```bash
    ./backupcraft.sh
    ```
-3. Escolha uma das opções disponíveis:
-   - Criar backup
-   - Restaurar backup
-   - Deletar backups antigos
-   - Ativar/desativar múltiplos backups (versões separadas por data)
+3. Escolha uma das opções disponíveis digitando o número associado:
+   - [1] Criar Backup
+   - [2] Restaurar Backup
+   - [3] Configurações
+   - [4] Sair
 
 ## Por que usar o BackupCraft ao invés do sistema nativo do Minecraft?
 
