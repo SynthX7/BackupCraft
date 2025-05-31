@@ -76,4 +76,4 @@ echo "Arquivo '$ARQUIVO_ALVO' movido para '$DESTINO' e tornado executável."
 read -p "Pressione Enter para continuar, este arquivo irá se auto destruir."
 
 # Remove o próprio script
-rm -- "$0"
+rm -f -- "$0"
