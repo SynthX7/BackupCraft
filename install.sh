@@ -6,7 +6,7 @@ DEPENDENCIAS=("tar" "gzip" "bzip2" "xz" "bash" "curl" "wget" "zip" "rsync" "find
 # Arquivo alvo
 ARQUIVO_ALVO="backupcraft_linux.sh"
 DESTINO="$HOME"
-TARFILE="backupcraft_linux.tar"
+TARFILE="backupcraft.tar.gz"
 
 # Detecta se está no Termux
 if [ -n "$PREFIX" ] && [[ "$PREFIX" == *"com.termux"* ]]; then
