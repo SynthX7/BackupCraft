@@ -1,101 +1,79 @@
 #!/bin/bash
 
-# Nome do script a ser instalado
+# Dependências necessárias
+DEPENDENCIAS=("tar" "gzip" "bzip2" "xz" "bash" "curl" "wget" "zip" "rsync" "find" "7z" "coreutils")
+
+# Arquivo alvo
 ARQUIVO_ALVO="backupcraft_linux.sh"
 DESTINO="$HOME"
-ZIPFILE="backupcraft_linux.zip"
+TARFILE="backupcraft_linux.tar"
 
-# =============================
-# DETECTA GERENCIADOR DE PACOTES
-# =============================
-
-if [ "$PREFIX" = "/data/data/com.termux/files/usr" ]; then
-  echo "Ambiente Termux detectado."
+# Detecta se está no Termux
+if [ -n "$PREFIX" ] && [[ "$PREFIX" == *"com.termux"* ]]; then
   PKG_MANAGER="pkg"
-  INSTALL_CMD="pkg install -y"
+elif command -v apt-get &> /dev/null; then
+  PKG_MANAGER="apt-get"
+elif command -v dnf &> /dev/null; then
+  PKG_MANAGER="dnf"
+elif command -v pacman &> /dev/null; then
+  PKG_MANAGER="pacman"
 else
-  if command -v apt-get &> /dev/null; then
-    PKG_MANAGER="apt-get"
-    INSTALL_CMD="sudo apt-get install -y"
-  elif command -v dnf &> /dev/null; then
-    PKG_MANAGER="dnf"
-    INSTALL_CMD="sudo dnf install -y"
-  elif command -v pacman &> /dev/null; then
-    PKG_MANAGER="pacman"
-    INSTALL_CMD="sudo pacman -Sy --noconfirm"
-  else
-    echo "Gerenciador de pacotes não suportado automaticamente."
-    exit 1
-  fi
+  echo "Gerenciador de pacotes não suportado automaticamente."
+  exit 1
 fi
 
 echo "Gerenciador detectado: $PKG_MANAGER"
 
-# =============================
-# DEFINIR DEPENDÊNCIAS
-# =============================
-
-DEPENDENCIAS=("zip" "curl" "wget" "bash" "rsync" "coreutils" "findutils" "unzip")
-
-# Adiciona o pacote correto de p7zip dependendo do ambiente
-if [ "$PKG_MANAGER" = "pkg" ]; then
-  DEPENDENCIAS+=("p7zip")
-else
-  DEPENDENCIAS+=("p7zip-full")
-fi
-
-# =============================
-# INSTALAR DEPENDÊNCIAS
-# =============================
+instalar_pacote() {
+  local pacote=$1
+  case $PKG_MANAGER in
+    pkg)
+      pkg install -y "$pacote"
+      ;;
+    apt-get)
+      sudo apt-get update -y
+      sudo apt-get install -y "$pacote"
+      ;;
+    dnf)
+      sudo dnf install -y "$pacote"
+      ;;
+    pacman)
+      sudo pacman -Sy --noconfirm "$pacote"
+      ;;
+  esac
+}
 
 for dep in "${DEPENDENCIAS[@]}"; do
   if ! command -v "$dep" &> /dev/null; then
-    echo "Dependência $dep não encontrada. Instalando..."
-    $INSTALL_CMD "$dep"
+    echo "Dependência '$dep' não encontrada. Instalando..."
+    instalar_pacote "$dep"
   else
-    echo "Dependência $dep já instalada."
+    echo "Dependência '$dep' já instalada."
   fi
 done
-
-# =============================
-# PROCESSO DE INSTALAÇÃO DO SCRIPT
-# =============================
 
 echo "Verificando arquivos do sistema..."
 mkdir -p "$DESTINO"
 
-# Verifica se o arquivo zip existe
-if [ ! -f "$ZIPFILE" ]; then
-  echo "Erro: Arquivo '$ZIPFILE' não encontrado!"
-  exit 1
-fi
-
 echo "Extraindo script..."
-unzip -q "$ZIPFILE"
+tar -xf "$TARFILE" || { echo "Falha ao extrair o arquivo TAR."; exit 1; }
 
-echo "Aplicando permissão de execução..."
+echo "Aplicando licença..."
 chmod +x "$ARQUIVO_ALVO"
 
 echo "Movendo script para '$DESTINO'..."
 mv "$ARQUIVO_ALVO" "$DESTINO/"
 
-# =============================
-# LIMPEZA FINAL
-# =============================
-
 echo "Excluindo arquivos temporários..."
-
-# Caminho do diretório onde o script está atualmente
+# Caminho absoluto do script atual
 DIR_ATUAL="$(dirname "$(realpath "$0")")"
 
-# Sobe um nível na pasta
+# Sobe para o diretório pai e remove a pasta do script
 cd ..
-
-# Remove a pasta do script
 rm -rf "$DIR_ATUAL"
 
-echo "Arquivo $ARQUIVO_ALVO movido para $DESTINO e tornado executável."
-read -p "Pressione Enter para continuar. Este instalador será removido..."
+echo "Arquivo '$ARQUIVO_ALVO' movido para '$DESTINO' e tornado executável."
+read -p "Pressione Enter para continuar, este arquivo irá se auto destruir."
 
-# Apaga o próprio script de instalação
+# Remove o próprio script
 rm -- "$0"
