@@ -1,5 +1,5 @@
-<img src="backupcraft.png">
-> _Salve seu mundo. Proteja sua história_
+<img src="backupcraft.png" margin="10px">
+<center>Salve seu mundo. Proteja sua história</center>
 
 ---
 
