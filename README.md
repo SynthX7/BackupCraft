@@ -4,7 +4,7 @@
 ---
 
 ## **Acesse nossa página!**
-👉 https://github.io/SynthX7/BackupCraft/webpage/download-page 👈
+👉 https://synthx7.github.io/BackupCraft/webpage/download-page 👈
 
 **Aviso:** _Não clone o repositório! O download dos arquivos é pelo link acima!_ 
 
