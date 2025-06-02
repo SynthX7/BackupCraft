@@ -1,2 +1,15 @@
-# BackupCraft
-BackupCraft is a lightweight and interactive script-based tool designed to manage and create Minecraft Java world backups on Linux and Windows.
+![[Backupcraft logo.png]]
+> _Salve seu mundo. Proteja sua história_
+
+---
+
+## **Acesse nossa página!**
+👉 https://backupcraft.com 👈
+
+**Aviso:** _Não clone o repositório! O download dos arquivos é pelo link acima!_ 
+
+---
+
+## Quer contribuir?
+
+Mande seu pull request com sua sugestão de melhoria ou sua própria versão do projeto! 
