@@ -1,4 +1,4 @@
-![[Backupcraft logo.png]]
+<img src="backupcraft.png">
 > _Salve seu mundo. Proteja sua história_
 
 ---
