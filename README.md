@@ -1,15 +1,39 @@
-<img src="backupcraft.png" margin="10px">
-<center>Salve seu mundo. Proteja sua história</center>
+<p align="center">
+  <img src="backupcraft.png" alt="BackupCraft banner">
+</p>
+
+<p align="center"><strong>Salve seu mundo. Proteja sua história.</strong></p>
 
 ---
 
-## **Acesse nossa página!**
-👉 https://synthx7.github.io/BackupCraft/webpage/download-page 👈
+## O que é o BackupCraft?
 
-**Aviso:** _Não clone o repositório! O download dos arquivos é pelo link acima!_ 
+O **BackupCraft** é uma ferramenta de terminal simples e eficaz para fazer backup dos seus mundos do Minecraft. Com ele, você protege suas criações contra perdas acidentais (ou mortes na lava) com apenas algumas teclas!
 
 ---
 
-## Quer contribuir?
+## 🌐 Acesse nossa página!
 
-Mande seu pull request com sua sugestão de melhoria ou sua própria versão do projeto! 
+👉 https://i3d.me/backupcraft 👈
+
+**Importante:** Não clone este repositório! O download deve ser feito diretamente pelo link acima.
+
+---
+
+## Como usar
+
+1. Acesse o link acima
+2. Baixe a versão mais recente para o seu sistema
+3. Siga as instruções para instalar e usar
+
+---
+
+## 💡 Quer contribuir?
+
+Você pode ajudar de várias formas:
+- Corrigindo bugs
+- Adicionando funcionalidades
+- Melhorando a interface
+- Traduzindo para outros idiomas
+
+Envie um Pull Request ou abra uma Issue com sua sugestão!
