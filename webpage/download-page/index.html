@@ -1,266 +1,395 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BackupCraft</title>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>BackupCraft</title>
+    <style>
+      /* Reset básico */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
 
-    body {
-      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-      color: #333;
-      line-height: 1.6;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-      padding: 40px;
-      text-align: center;
-    }
-
-    header {
-      margin-bottom: 30px;
-    }
-
-    h1 {
-      font-size: 2.5em;
-      color: #2c3e50;
-      margin-bottom: 10px;
-    }
-
-    .logo {
-      display: flex;
-      margin-bottom: 30px;
-      margin-top: 5px;
-    }
-
-    .subtitle {
-      font-size: 1.2em;
-      color: #7f8c8d;
-    }
-
-    .warning {
-      background: #ffeaa7;
-      color: #d63031;
-      padding: 10px;
-      border-radius: 5px;
-      margin: 20px 0;
-      font-weight: bold;
-      display: none; /* Oculta por padrão */
-    }
-
-    .platforms {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-      margin: 20px 0;
-      flex-wrap: wrap;
-    }
-
-    .platform {
-      background: #ecf0f1;
-      padding: 10px 20px;
-      border-radius: 5px;
-      color: #7f8c8d;
-      font-weight: 500;
-      cursor: pointer;
-      opacity: 1;
-      transition: background 0.3s ease;
-    }
-
-    .platform.active {
-      background: #3498db;
-      color: #fff;
-    }
-
-    .download-section {
-      margin: 30px 0;
-      display: none;
-    }
-
-    .download-section.active {
-      display: block;
-    }
-
-    .download-btn, .github-btn {
-      display: inline-block;
-      padding: 12px 24px;
-      border-radius: 5px;
-      text-decoration: none;
-      font-weight: bold;
-      margin: 10px;
-      transition: background 0.3s ease;
-    }
-
-    .download-btn {
-      background: #3498db;
-      color: #fff;
-    }
-
-    .download-btn:hover {
-      background: #2980b9;
-    }
-
-    .github-btn {
-      background: #2c3e50;
-      color: #fff;
-    }
-
-    .github-btn:hover {
-      background: #1a252f;
-    }
-
-    .instructions {
-      text-align: left;
-      background: #1e1e1e;
-      padding: 20px;
-      border-radius: 8px;
-      margin-top: 30px;
-      color: #F0F0F0;
-      font-size: 0.95em;
-      display: none; /* Oculta por padrão */
-    }
-
-    .instructions h2 {
-      font-size: 1.8em;
-      color: #ffffff;
-      margin-bottom: 15px;
-    }
-
-    .instructions ol {
-      margin-left: 20px;
-    }
-
-    .instructions li {
-      margin-bottom: 10px;
-    }
-
-    code {
-      display: block;
-      background: #2d2d2d;
-      color: #f8f8f2;
-      padding: 10px;
-      border-radius: 5px;
-      margin-top: 5px;
-      white-space: pre-wrap;
-    }
-
-    footer {
-      margin-top: 30px;
-      font-size: 0.9em;
-      color: #7f8c8d;
-    }
-
-    @media (max-width: 600px) {
-      .container {
+      body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        color: #333;
+        line-height: 1.6;
         padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .container {
+        max-width: 800px;
+        width: 100%;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 40px 30px;
+        text-align: center;
+      }
+
+      header {
+        margin-bottom: 30px;
       }
 
       h1 {
-        font-size: 2em;
+        font-size: 2.5em;
+        color: #2c3e50;
+        margin-bottom: 10px;
       }
 
-      .platforms {
-        flex-direction: column;
-      }
-
-      .warning.mobile {
+      .logo {
+        margin: 0 auto 30px auto;
+        max-width: 100%;
+        height: auto;
         display: block;
       }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <header>
-      <center><img src="backupcraft-logo.png" class="logo" width="680" height="95"></center>
-      <p class="subtitle">Salve seu mundo. Proteja sua história.</p>
-      <p class="warning mobile">⚠️ Este programa não é compatível com dispositivos móveis.</p>
-    </header>
 
-    <main>
-      <div class="platforms">
-        <span class="platform" data-platform="linux">Linux</span>
-        <span class="platform" data-platform="windows">Windows</span>
-        <span class="platform" data-platform="macos">macOS</span>
-      </div>
+      .subtitle {
+        font-size: 1.2em;
+        color: #7f8c8d;
+        margin-bottom: 5px;
+      }
 
-      <div class="download-section" id="download-linux">
-        <h2>Download disponível para Linux:</h2>
-        <a href="https://drive.google.com/file/d/1tDkTvmaSh0l8VmyN7ecWQ4GqLXSnewNb/view?usp=drive_link" class="download-btn">⬇️ Baixar BackupCraft (Linux)</a>
-        <a href="https://github.com/SynthX7/BackupCraft" class="github-btn" target="_blank">🌐 Ver no GitHub</a>
-      </div>
+      .warning {
+        background: #ffeaa7;
+        color: #d63031;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 20px 0;
+        font-weight: bold;
+        display: none;
+      }
 
-      <section class="instructions" id="instructions-linux">
-        <h2>Como instalar no Linux</h2>
-        <ol>
-          <li>Baixe o arquivo acima e extraia a pasta chamada <code>BackupCraft</code>.</li>
-          <li>Abra o terminal com <code>Ctrl + Alt + T</code>.</li>
-          <li>Use o comando abaixo para acessar a pasta (se ela estiver em Downloads):
-            <code>cd ~/Downloads/BackupCraft</code>
-          </li>
-          <li>Dê permissão de execução para o instalador:
-            <code>chmod +x install.sh</code>
-          </li>
-          <li>Agora inicie a instalação com:
-            <code>./install.sh</code>
-          </li>
-          <li>Quando terminar, vá para a sua pasta pessoal com:
-            <code>cd ~</code>
-          </li>
-          <li>Finalmente, execute o programa com:
-            <code>./backupcraft.sh</code>
-          </li>
-        </ol>
-      </section>
-    </main>
+      /* Exibir aviso em mobile */
+      .warning.mobile {
+        display: none;
+      }
 
-    <footer>
-      <p>© 2025 BackupCraft. Todos os direitos reservados.</p>
-      <p>Email para contato: syntaxechonomics@gmail.com</p>
-    </footer>
-  </div>
+      /* Navegação de plataformas */
+      nav.platforms {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
 
-  <script>
-    const platforms = document.querySelectorAll('.platform');
-    const downloadSection = document.getElementById('download-linux');
-    const instructionsSection = document.getElementById('instructions-linux');
+      nav.platforms button.platform {
+        background: #ecf0f1;
+        padding: 10px 20px;
+        border-radius: 5px;
+        color: #7f8c8d;
+        font-weight: 500;
+        cursor: pointer;
+        border: none;
+        transition: background 0.3s ease, color 0.3s ease;
+        font-size: 1em;
+      }
 
-    platforms.forEach(platform => {
-      platform.addEventListener('click', () => {
-        platforms.forEach(p => p.classList.remove('active'));
-        platform.classList.add('active');
+      nav.platforms button.platform:focus-visible {
+        outline: 2px solid #2980b9;
+        outline-offset: 2px;
+      }
 
-        const selectedPlatform = platform.dataset.platform;
+      nav.platforms button.platform.active,
+      nav.platforms button.platform[aria-pressed="true"] {
+        background: #3498db;
+        color: #fff;
+      }
 
-        if (selectedPlatform === 'linux') {
-          downloadSection.classList.add('active');
-          instructionsSection.style.display = 'block';
-        } else {
-          downloadSection.classList.remove('active');
-          instructionsSection.style.display = 'none';
-          const githubLink = 'https://github.com/SynthX7/BackupCraft';
-          alert(`A versão para ${selectedPlatform.toUpperCase()} ainda não está disponível.\n\nQuer colaborar? Acesse:\n${githubLink}`);
+      .download-section {
+        margin: 30px 0;
+        display: none;
+        text-align: center;
+      }
+
+      .download-section.active {
+        display: block;
+      }
+
+      .download-btn,
+      .github-btn {
+        display: inline-block;
+        padding: 12px 24px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin: 10px 8px;
+        transition: background 0.3s ease;
+        font-size: 1em;
+      }
+
+      .download-btn {
+        background: #3498db;
+        color: #fff;
+      }
+
+      .download-btn:hover,
+      .download-btn:focus-visible {
+        background: #2980b9;
+      }
+
+      .github-btn {
+        background: #2c3e50;
+        color: #fff;
+      }
+
+      .github-btn:hover,
+      .github-btn:focus-visible {
+        background: #1a252f;
+      }
+
+      .instructions {
+        text-align: left;
+        background: #1e1e1e;
+        padding: 20px;
+        border-radius: 8px;
+        margin-top: 30px;
+        color: #f0f0f0;
+        font-size: 0.95em;
+        display: none;
+      }
+
+      .instructions.active {
+        display: block;
+      }
+
+      .instructions h2 {
+        font-size: 1.8em;
+        color: #fff;
+        margin-bottom: 15px;
+      }
+
+      .instructions ol {
+        margin-left: 20px;
+        line-height: 1.5;
+      }
+
+      .instructions li {
+        margin-bottom: 10px;
+      }
+
+      code {
+        display: block;
+        background: #2d2d2d;
+        color: #f8f8f2;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 5px;
+        white-space: pre-wrap;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.9em;
+      }
+
+      footer {
+        margin-top: 30px;
+        font-size: 0.9em;
+        color: #7f8c8d;
+      }
+
+      /* Responsivo */
+      @media (max-width: 600px) {
+        .container {
+          padding: 20px 15px;
         }
-      });
-    });
 
-    // Opcional: detectar se está em dispositivo móvel (reforço via JS)
-    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
-    if (isMobile) {
-      document.querySelector('.warning.mobile').style.display = 'block';
-    }
-  </script>
-</body>
+        h1 {
+          font-size: 2em;
+        }
+
+        nav.platforms {
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .warning.mobile {
+          display: block;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" role="main">
+      <header>
+        <!-- Usar alt descritivo na logo -->
+        <img
+          src="backupcraft-logo.png"
+          alt="Logo do BackupCraft"
+          class="logo"
+          width="680"
+          height="95"
+        />
+        <p class="subtitle">Salve seu mundo. Proteja sua história.</p>
+        <p class="warning mobile" role="alert" aria-live="assertive">
+          ⚠️ Este programa não é compatível com dispositivos móveis.
+        </p>
+      </header>
+
+      <main>
+        <nav class="platforms" role="tablist" aria-label="Escolha a plataforma">
+          <button
+            class="platform active"
+            data-platform="linux"
+            aria-pressed="true"
+            role="tab"
+            tabindex="0"
+          >
+            Linux
+          </button>
+          <button
+            class="platform"
+            data-platform="windows"
+            aria-pressed="false"
+            role="tab"
+            tabindex="-1"
+          >
+            Windows
+          </button>
+          <button
+            class="platform"
+            data-platform="macos"
+            aria-pressed="false"
+            role="tab"
+            tabindex="-1"
+          >
+            macOS
+          </button>
+        </nav>
+
+        <section
+          class="download-section active"
+          id="download-linux"
+          role="tabpanel"
+          aria-labelledby="linux-tab"
+        >
+          <h2>Download disponível para Linux:</h2>
+          <a
+            href="https://drive.google.com/file/d/1tDkTvmaSh0l8VmyN7ecWQ4GqLXSnewNb/view?usp=drive_link"
+            class="download-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >⬇️ Baixar BackupCraft (Linux)</a
+          >
+          <a
+            href="https://github.com/SynthX7/BackupCraft"
+            class="github-btn"
+            target="_blank"
+            rel="noopener noreferrer"
+            >🌐 Ver no GitHub</a
+          >
+        </section>
+
+        <section
+          class="instructions active"
+          id="instructions-linux"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <h2>Como instalar no Linux</h2>
+          <ol>
+            <li>
+              Baixe o arquivo acima e extraia a pasta chamada
+              <code>BackupCraft</code>.
+            </li>
+            <li>Abra o terminal com <code>Ctrl + Alt + T</code>.</li>
+            <li>
+              Use o comando abaixo para acessar a pasta (se ela estiver em
+              Downloads):
+              <code>cd ~/Downloads/BackupCraft</code>
+            </li>
+            <li>
+              Dê permissão de execução para o instalador:
+              <code>chmod +x install.sh</code>
+            </li>
+            <li>
+              Agora inicie a instalação com:
+              <code>./install.sh</code>
+            </li>
+            <li>
+              Quando terminar, vá para a sua pasta pessoal com:
+              <code>cd ~</code>
+            </li>
+            <li>
+              Finalmente, execute o programa com:
+              <code>./backupcraft.sh</code>
+            </li>
+          </ol>
+        </section>
+      </main>
+
+      <footer>
+        <p>© 2025 BackupCraft. Todos os direitos reservados.</p>
+        <p>Email para contato: syntaxechonomics@gmail.com</p>
+      </footer>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const buttons = document.querySelectorAll("button.platform");
+        const downloadSections = {
+          linux: document.getElementById("download-linux"),
+          windows: document.getElementById("download-windows"),
+          macos: document.getElementById("download-macos"),
+        };
+        const instructionsSections = {
+          linux: document.getElementById("instructions-linux"),
+          windows: document.getElementById("instructions-windows"),
+          macos: document.getElementById("instructions-macos"),
+        };
+
+        function setActivePlatform(platform) {
+          buttons.forEach((btn) => {
+            const isActive = btn.dataset.platform === platform;
+            btn.classList.toggle("active", isActive);
+            btn.setAttribute("aria-pressed", isActive ? "true" : "false");
+            btn.tabIndex = isActive ? 0 : -1;
+          });
+
+          Object.keys(downloadSections).forEach((key) => {
+            if (downloadSections[key]) {
+              downloadSections[key].classList.toggle(
+                "active",
+                key === platform
+              );
+            }
+          });
+
+          Object.keys(instructionsSections).forEach((key) => {
+            if (instructionsSections[key]) {
+              instructionsSections[key].classList.toggle(
+                "active",
+                key === platform
+              );
+            }
+          });
+        }
+
+        buttons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            setActivePlatform(btn.dataset.platform);
+          });
+
+          btn.addEventListener("keydown", (e) => {
+            let index = Array.from(buttons).indexOf(e.target);
+            if (e.key === "ArrowRight") {
+              e.preventDefault();
+              const nextIndex = (index + 1) % buttons.length;
+              buttons[nextIndex].focus();
+            } else if (e.key === "ArrowLeft") {
+              e.preventDefault();
+              const prevIndex = (index - 1 + buttons.length) % buttons.length;
+              buttons[prevIndex].focus();
+            }
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
