@@ -4,7 +4,7 @@
 DEPENDENCIAS=("tar" "gzip" "bzip2" "xz" "bash" "curl" "wget" "zip" "rsync" "find" "7z" "coreutils")
 
 # Arquivo alvo
-ARQUIVO_ALVO="backupcraft_linux.sh"
+ARQUIVO_ALVO="backupcraft.sh"
 DESTINO="$HOME"
 TARFILE="backupcraft.tar.gz"
 
