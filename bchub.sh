@@ -29,8 +29,7 @@ log_action() {
 
 # Carregar configurações
 load_config() {
-  if [[ ! -f "$CONFIG_FILE" ]]; then
-    cat > "$CONFIG_FILE" << EOF
+  [[ -f "$CONFIG_FILE" ]] || cat > "$CONFIG_FILE" << EOF
 MULTIPLE_BACKUPS=true
 REPLACE_ON_RESTORE=false
 IGNORE_BACKUP_WORLD=true
@@ -38,9 +37,9 @@ ENABLE_HIDDEN_BACKUP=true
 ENABLE_ENCRYPTION=false
 ENCRYPTION_PASSWORD=""
 AUTO_BACKUP=false
-AUTO_BACKUP_INTERVAL=3600
+AUTO_BACKUP_INTERVAL=600
+AUTO_BACKUP_WORLDS=""
 EOF
-  fi
   source "$CONFIG_FILE"
 }
 
@@ -62,43 +61,39 @@ ENABLE_ENCRYPTION=$ENABLE_ENCRYPTION
 ENCRYPTION_PASSWORD="$ENCRYPTION_PASSWORD"
 AUTO_BACKUP=$AUTO_BACKUP
 AUTO_BACKUP_INTERVAL=$AUTO_BACKUP_INTERVAL
+AUTO_BACKUP_WORLDS="$AUTO_BACKUP_WORLDS"
 EOF
 }
 
-# Barra de progresso estilizada
-fancy_progress_bar() {
-  local progress=$1
-  local total=$2
+# Barra de progresso dinâmica ligada ao processo da compressão
+progress_during_compression() {
+  local pid=$1       # PID do processo da compressão
+  local total_time=$2 # Estimativa de tempo em segundos
   local width=40
-  local filled=$(( progress * width / total ))
-  local empty=$(( width - filled ))
-  local percentage=$(( progress * 100 / total ))
+  local elapsed=0
 
-  local bar="\e[32m["
-  for ((i=0; i<filled; i++)); do bar+="█"; done
-  for ((i=0; i<empty; i++)); do bar+=" "; done
-  bar+="\e[0m] ${YELLOW}${percentage}%%\e[0m"
+  while kill -0 "$pid" 2>/dev/null; do
+    local progress=$elapsed
+    (( progress > total_time )) && progress=$total_time
+    local filled=$(( progress * width / total_time ))
+    local empty=$(( width - filled ))
+    local remaining=$(( total_time - progress ))
+    local percentage=$(( progress * 100 / total_time ))
 
-  local remaining=$(( total - progress ))
-  bar+=" (${remaining}s restantes)"
+    local bar="\e[32m["
+    for ((i=0; i<filled; i++)); do bar+="█"; done
+    for ((i=0; i<empty; i++)); do bar+=" "; done
+    bar+="\e[0m] ${percentage}%"
+    bar+=" (${remaining}s restantes)"
 
-  echo -ne "\r$bar"
-}
+    echo -ne "\r$bar"
 
-# Simula progresso proporcional ao tamanho
-simulate_progress_by_size() {
-  local size_bytes=$1
-  local max_time=30
-  local time_sec=$(( size_bytes / 1000000 ))
-  (( time_sec > max_time )) && time_sec=$max_time
-  (( time_sec < 5 )) && time_sec=5
-
-  local steps=$time_sec
-  for ((i=0; i<=steps; i++)); do
-    fancy_progress_bar $i $steps
     sleep 1
+    ((elapsed++))
   done
-  echo
+
+  # Finaliza com 100%
+  echo -e "\r\e[32m[${width}█]\e[0m 100% (0s restantes)\n"
 }
 
 # Verifica se pasta é mundo válido
@@ -147,7 +142,20 @@ incremental_backup() {
   rm -rf "$tmp_backup_dir"
 }
 
-# Backup do mundo
+# Estima tempo de compressão com base no tamanho e nos núcleos da CPU
+estimate_time_by_size() {
+  local path="$1"  # Caminho do diretório a ser compactado
+  local size_bytes=$(du -sb "$path" | cut -f1)
+  local cores=$(nproc)
+  local speed=$(( cores * 4400000 ))  # 4,4 MB/s por núcleo (estimado)
+  local time_sec=$(( size_bytes / speed ))
+
+  # Limite de segurança
+  (( time_sec < 5 )) && time_sec=5
+
+  echo "$time_sec"
+}
+
 backup_world() {
   mapfile -t worlds < <(list_worlds)
   if [ ${#worlds[@]} -eq 0 ]; then
@@ -161,40 +169,62 @@ backup_world() {
     [[ "$REPLY" == $((${#worlds[@]}+1)) || "$world" == "Voltar" ]] && return
     if [[ -n "$world" ]]; then
       local timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
-      local backup_name
-      if [[ "$MULTIPLE_BACKUPS" == "true" ]]; then
-        backup_name="${world} (${timestamp})"
-      else
-        backup_name="${world}"
-      fi
-
-      mkdir -p "$BACKUP_DIR/$backup_name"
-
-      echo "Preparando backup do mundo '$world'..."
+      local backup_name="${world}"
+      [[ "$MULTIPLE_BACKUPS" == "true" ]] && backup_name="${world} (${timestamp})"
 
       local world_path="$SAVE_DIR/$world"
-      local size_kb=$(du -s "$world_path" | cut -f1)
-      local size_mb=$((size_kb / 1024))
+      local zip_path="$BACKUP_DIR/$backup_name/${world}.7z"
+      mkdir -p "$BACKUP_DIR/$backup_name"
 
-      if (( size_mb == 0 )); then
-        size_mb=1
+      # Detectar advancements principal
+      local advancements_dir="$world_path/advancements"
+      local advancements_file=""
+      if [[ -d "$advancements_dir" ]]; then
+        advancements_file=$(ls "$advancements_dir"/*.json 2>/dev/null | while read f; do
+          echo "$(jq '. | length' "$f") $(stat -c %Y "$f") $f"
+        done | sort -k1,1n -k2,2nr | head -n1 | awk '{print $3}')
       fi
 
-      echo "Iniciando compressão..."
-      simulate_progress_by_size $((size_kb * 1024))
+      # Criar estrutura temporária
+      local tmpdir
+      tmpdir="$(mktemp -d)"
+      mkdir -p "$tmpdir/World"
+      cp -r "$world_path/"* "$tmpdir/World/"
 
-      if [[ "$ENABLE_ENCRYPTION" == "true" && -n "$ENCRYPTION_PASSWORD" ]]; then
-        (cd "$world_path" && 7z a -t7z -p"$ENCRYPTION_PASSWORD" -mhe=on "$BACKUP_DIR/$backup_name/${world}.7z" .) >/dev/null
-      else
-        (cd "$world_path" && 7z a -t7z "$BACKUP_DIR/$backup_name/${world}.7z" .) >/dev/null
+      # Adicionar conquistas ao backup
+      if [[ -n "$advancements_file" && -f "$advancements_file" ]]; then
+        jq '.' "$advancements_file" > "$tmpdir/advancements.txt"
       fi
+
+      echo "Iniciando compressão do backup..."
+
+      # Iniciar compressão em segundo plano
+      (
+        cd "$tmpdir" || exit
+        if [[ "$ENABLE_ENCRYPTION" == "true" && -n "$ENCRYPTION_PASSWORD" ]]; then
+          7z a -t7z -p"$ENCRYPTION_PASSWORD" -mhe=on "$zip_path" . > /dev/null
+        else
+          7z a -t7z "$zip_path" . > /dev/null
+        fi
+      ) &
+      local compress_pid=$!
+
+      # Estimar tempo com base no tamanho
+      local time_sec
+      time_sec=$(estimate_time_by_size "$tmpdir")
+
+      # Mostrar barra de progresso
+      progress_during_compression "$compress_pid" "$time_sec"
+
+      wait "$compress_pid"
+      rm -rf "$tmpdir"
 
       if [[ $? -eq 0 ]]; then
-        echo -e "${GREEN}Backup criado com sucesso em: $BACKUP_DIR/$backup_name/${world}.7z${NC}"
-        log_action "Backup criado: $backup_name/$world.7z"
+        echo -e "${GREEN}Backup criado com sucesso em: $zip_path${NC}"
+        log_action "Backup criado: $backup_name/${world}.7z"
       else
-        echo -e "${RED}Erro ao criar o backup! Verifique permissões ou espaço em disco.${NC}"
-        log_action "Erro ao criar backup: $backup_name/$world.7z (Código: $?)"
+        echo -e "${RED}Erro ao criar o backup.${NC}"
+        log_action "Erro ao criar backup: $backup_name/${world}.7z"
         read -p "Pressione Enter para continuar..."
         return
       fi
@@ -204,7 +234,6 @@ backup_world() {
         mkdir -p "$HIDDEN_BACKUP_DIR"
         cp -r "$world_path" "$HIDDEN_BACKUP_DIR/${world}_hidden"
         log_action "Backup oculto criado: ${world}_hidden"
-        simulate_progress_by_size $((size_kb * 1024 / 2))
       fi
 
       read -p "Backup finalizado. Pressione Enter para continuar..."
@@ -215,74 +244,74 @@ backup_world() {
   done
 }
 
-# Restaurar backup
-restore_backup() {
-  mapfile -t backups < <(list_backups)
-  if [ ${#backups[@]} -eq 0 ]; then
-    echo -e "${RED}Nenhum backup encontrado.${NC}"
+
+# Restayura as conquistas
+restore_advancements() {
+  mapfile -t worlds < <(list_worlds)
+  if [ ${#worlds[@]} -eq 0 ]; then
+    echo -e "${RED}Nenhum mundo válido encontrado.${NC}"
     read -p "Pressione Enter para continuar..."
     return
   fi
 
-  echo "===== Backups Disponíveis ====="
-  select backup in "${backups[@]}" "Voltar"; do
-    [[ "$REPLY" == $((${#backups[@]}+1)) || "$backup" == "Voltar" ]] && return
-    if [[ -n "$backup" ]]; then
-      echo "Restaurar backup '$backup'..."
-
-      local backup_path="$BACKUP_DIR/$backup"
-      local zip_file
-      zip_file=$(find "$backup_path" -maxdepth 1 -name '*.7z' | head -n 1)
-
-      if [[ ! -f "$zip_file" ]]; then
-        echo -e "${RED}Arquivo de backup não encontrado!${NC}"
+  echo "===== Selecionar Mundo para Restaurar Conquistas ====="
+  select world in "${worlds[@]}" "Voltar"; do
+    [[ "$REPLY" == $((${#worlds[@]}+1)) || "$world" == "Voltar" ]] && return
+    if [[ -n "$world" ]]; then
+      local advancements_dir="$SAVE_DIR/$world/advancements"
+      if [[ ! -d "$advancements_dir" ]]; then
+        echo -e "${RED}Pasta de conquistas não encontrada no mundo selecionado.${NC}"
         read -p "Pressione Enter para continuar..."
         return
       fi
 
-      local restore_dir_name="$backup"
-      if [[ "$backup" == *"(BackupCraft)"* ]]; then
-        restore_dir_name="$backup"
-        echo -e "${YELLOW}Restaurando backup nomeado '(BackupCraft)', cuidado para não sobrescrever mundos importantes.${NC}"
-      fi
+      echo "Analisando arquivos de conquistas em \"$advancements_dir\"..."
 
-      local restore_path="$SAVE_DIR/$restore_dir_name"
+      # Encontrar arquivo com maior número de conquistas e mais antigo (em caso de empate)
+      local best_file=""
+      local current_file=""
+      local max_count=-1
+      local min_count=999999
+      local newest_time=0
+      local oldest_time=9999999999
 
-      if [[ -d "$restore_path" ]]; then
-        if [[ "$REPLACE_ON_RESTORE" == "true" ]]; then
-          rm -rf "$restore_path"
-          echo "Diretório existente removido para substituição."
-        else
-          echo -e "${RED}Diretório já existe e substituição está desativada. Operação cancelada.${NC}"
-          read -p "Pressione Enter para continuar..."
-          return
+      while IFS= read -r -d '' file; do
+        local count=$(jq '. | length' "$file")
+        local mod_time=$(stat -c %Y "$file")
+
+        # Melhor arquivo (mais conquistas, mais antigo)
+        if (( count > max_count )) || { (( count == max_count )) && (( mod_time < oldest_time )); }; then
+          max_count=$count
+          oldest_time=$mod_time
+          best_file="$file"
         fi
-      fi
 
-      mkdir -p "$restore_path"
-
-      if [[ "$ENABLE_ENCRYPTION" == "true" ]]; then
-        read -s -p "Digite a senha do backup: " input_password
-        echo
-        if ! 7z t -p"$input_password" "$zip_file" >/dev/null 2>&1; then
-          echo -e "${RED}Senha incorreta ou arquivo corrompido!${NC}"
-          log_action "Erro na restauração: Senha incorreta para $backup"
-          read -p "Pressione Enter para continuar..."
-          return
+        # Atual presumido (menos conquistas, mais recente)
+        if (( count < min_count )) || { (( count == min_count )) && (( mod_time > newest_time )); }; then
+          min_count=$count
+          newest_time=$mod_time
+          current_file="$file"
         fi
-        7z x -p"$input_password" "$zip_file" -o"$restore_path" >/dev/null
-      else
-        7z x "$zip_file" -o"$restore_path" >/dev/null
+      done < <(find "$advancements_dir" -name "*.json" -print0)
+
+      if [[ -z "$best_file" || -z "$current_file" ]]; then
+        echo -e "${RED}Não foi possível identificar os arquivos necessários para restauração.${NC}"
+        read -p "Pressione Enter para continuar..."
+        return
       fi
 
-      if [[ $? -eq 0 ]]; then
-        echo -e "${GREEN}Backup restaurado com sucesso em: $restore_path${NC}"
-        log_action "Backup restaurado: $backup"
-      else
-        echo -e "${RED}Falha ao restaurar o backup!${NC}"
-        log_action "Erro na restauração: $backup"
+      echo "🟢 Restaurando conquistas:"
+      echo "📦 De: \"$best_file\""
+      echo "➡️ Para: \"$current_file\""
+
+      jq '.' "$best_file" > "$current_file"
+
+      if [[ "$best_file" != "$current_file" ]]; then
+        rm -f "$best_file"
+        echo "🧹 Arquivo antigo removido: \"$best_file\""
       fi
 
+      echo -e "${GREEN}Conquistas restauradas com sucesso.${NC}"
       read -p "Pressione Enter para continuar..."
       return
     else
@@ -291,20 +320,59 @@ restore_backup() {
   done
 }
 
-# Limpar backups antigos
-clean_old_backups() {
-  local max_backups=10
-  mapfile -t backups < <(ls -d "$BACKUP_DIR"/*/ | sort -r)
-  if [ ${#backups[@]} -gt $max_backups ]; then
-    for ((i=$max_backups; i<${#backups[@]}; i++)); do
-      rm -rf "${backups[$i]}"
-      log_action "Backup antigo removido: ${backups[$i]}"
-    done
-    echo "Backups antigos removidos (mantidos os $max_backups mais recentes)."
-  else
-    echo "Nenhum backup antigo para remover."
+
+
+
+
+# Restaura o backup automaticamente
+restore_backup() {
+  mapfile -t backups < <(list_backups)
+  if [ ${#backups[@]} -eq 0 ]; then
+    echo -e "${RED}Nenhum backup disponível.${NC}"
+    read -p "Pressione Enter para continuar..."
+    return
   fi
-  read -p "Pressione Enter para continuar..."
+
+  echo "===== Backups Disponíveis ====="
+  select backup in "${backups[@]}" "Voltar"; do
+    [[ "$REPLY" == $((${#backups[@]}+1)) || "$backup" == "Voltar" ]] && return
+    if [[ -n "$backup" ]]; then
+      local backup_path="$BACKUP_DIR/$backup"
+      local archive=$(find "$backup_path" -name "*.7z" | head -n 1)
+      local world_name=$(basename "$archive" .7z)
+
+      [[ ! -f "$archive" ]] && echo -e "${RED}Arquivo de backup não encontrado.${NC}" && return
+
+      echo "Extraindo backup..."
+      tmpdir="$(mktemp -d)"
+      if [[ "$ENABLE_ENCRYPTION" == "true" && -n "$ENCRYPTION_PASSWORD" ]]; then
+        7z x -p"$ENCRYPTION_PASSWORD" "$archive" -o"$tmpdir" >/dev/null
+      else
+        7z x "$archive" -o"$tmpdir" >/dev/null
+      fi
+
+      [[ $? -ne 0 ]] && echo -e "${RED}Erro ao extrair o backup.${NC}" && rm -rf "$tmpdir" && return
+
+      # Substituir mundo atual
+      local target_path="$SAVE_DIR/$world_name"
+      echo -e "${YELLOW}⚠️ O mundo atual será substituído.${NC}"
+      read -p "Deseja continuar? (s/n): " confirm
+      [[ "$confirm" != "s" ]] && echo "Cancelado." && rm -rf "$tmpdir" && return
+
+      rm -rf "$target_path"
+      mkdir -p "$target_path"
+      cp -r "$tmpdir/World/"* "$target_path/"
+
+      echo -e "${GREEN}✅ Mundo restaurado com sucesso.${NC}"
+      log_action "Mundo restaurado: $world_name"
+
+      rm -rf "$tmpdir"
+      read -p "Pressione Enter para continuar..."
+      return
+    else
+      echo "Opção inválida."
+    fi
+  done
 }
 
 # Backup automático
@@ -357,71 +425,139 @@ backup_world_auto() {
 config_menu() {
   while true; do
     clear
-    echo "===== Configurações ====="
-    echo "[1] Backups versionados: $( [[ \"$MULTIPLE_BACKUPS\" == \"true\" ]] && echo -e \"${GREEN}Ativado${NC}\" || echo -e \"${RED}Desativado${NC}\" )"
-    echo "[2] Substituir mundo ao restaurar: $( [[ \"$REPLACE_ON_RESTORE\" == \"true\" ]] && echo -e \"${GREEN}Ativado${NC}\" || echo -e \"${RED}Desativado${NC}\" )"
-    echo "[3] Ignorar mundos restaurados (com sufixo 'BackupCraft'): $( [[ \"$IGNORE_BACKUP_WORLD\" == \"true\" ]] && echo -e \"${GREEN}Ativado${NC}\" || echo -e \"${RED}Desativado${NC}\" )"
-    echo "[4] Backup oculto extra (medida de segurança): $( [[ \"$ENABLE_HIDDEN_BACKUP\" == \"true\" ]] && echo -e \"${GREEN}Ativado${NC}\" || echo -e \"${RED}Desativado${NC}\" )"
-    echo "[5] Criptografia dos backups: $( [[ \"$ENABLE_ENCRYPTION\" == \"true\" ]] && echo -e \"${GREEN}Ativado${NC}\" || echo -e \"${RED}Desativado${NC}\" )"
-    echo "[6] Senha para criptografia: $( [[ -n \"$ENCRYPTION_PASSWORD\" ]] && echo -e \"${YELLOW}Definida${NC}\" || echo -e \"${RED}Não definida${NC}\" )"
-    echo "[7] Backup automático: $( [[ \"$AUTO_BACKUP\" == \"true\" ]] && echo -e \"${GREEN}Ativado${NC}\" || echo -e \"${RED}Desativado${NC}\" )"
-    echo "[8] Intervalo do backup automático (segundos): $AUTO_BACKUP_INTERVAL"
-    echo "[9] Voltar"
+    echo "===== Configurações Gerais ====="
+    echo "[1] Backups versionados: $MULTIPLE_BACKUPS"
+    echo "[2] Substituir mundo ao restaurar: $REPLACE_ON_RESTORE"
+    echo "[3] Ignorar mundos restaurados (BackupCraft): $IGNORE_BACKUP_WORLD"
+    echo "[4] Backup oculto extra: $ENABLE_HIDDEN_BACKUP"
+    echo "[5] Criptografia: $ENABLE_ENCRYPTION"
+    echo "[6] Senha de criptografia: $( [[ -n \"$ENCRYPTION_PASSWORD\" ]] && echo \"Definida\" || echo \"Não definida\" )"
+    echo "[7] Voltar"
     read -p "Escolha: " opt
     case $opt in
-      1) MULTIPLE_BACKUPS=$([[ "$MULTIPLE_BACKUPS" == "true" ]] && echo "false" || echo "true");;
-      five) ENABLE_ENCRYPTION=$([[ "$ENABLE_ENCRYPTION" == "true" ]] && echo "false" || echo "true");;
-      6) read -s -p "Digite a nova senha: " ENCRYPTION_PASSWORD; echo;;
-      7) AUTO_BACKUP=$([[ "$AUTO_BACKUP" == "true" ]] && echo "false" || echo "true");;
-      8) read -p "Novo intervalo (segundos): " AUTO_BACKUP_INTERVAL;;
-      9) save_config; break;;
+      1) MULTIPLE_BACKUPS=$( [[ "$MULTIPLE_BACKUPS" == "true" ]] && echo "false" || echo "true" );;
+      2) REPLACE_ON_RESTORE=$( [[ "$REPLACE_ON_RESTORE" == "true" ]] && echo "false" || echo "true" );;
+      3) IGNORE_BACKUP_WORLD=$( [[ "$IGNORE_BACKUP_WORLD" == "true" ]] && echo "false" || echo "true" );;
+      4) ENABLE_HIDDEN_BACKUP=$( [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]] && echo "false" || echo "true" );;
+      5) ENABLE_ENCRYPTION=$( [[ "$ENABLE_ENCRYPTION" == "true" ]] && echo "false" || echo "true" );;
+      6) read -s -p "Digite a nova senha: " ENCRYPTION_PASSWORD; sleep 1 ;;
+      7) save_config; break;;
       *) echo "Opção inválida."; sleep 1;;
     esac
   done
 }
 
+formatar_tempo() {
+  local s=$1
+  if ((s < 60)); then echo "$s segundos"
+  elif ((s < 3600)); then echo "$((s / 60)) minutos"
+  else echo "$((s / 3600))h $(((s % 3600) / 60))m"; fi
+}
+
+bcauto_config_menu() {
+  while true; do
+    clear
+    echo "===== Configuração do Backup Automático ====="
+    echo "[1] Selecionar mundos (atual: $AUTO_BACKUP_WORLDS)"
+    echo "[2] Frequência: $(formatar_tempo $AUTO_BACKUP_INTERVAL)"
+    echo "[3] $( [[ "$AUTO_BACKUP" == "true" ]] && echo "Desativar" || echo "Ativar" ) backup automático (status: $AUTO_BACKUP)"
+    echo "[4] Executar agora (terminal deve permanecer aberto)"
+    echo "[5] Voltar"
+    read -p "> " opt
+    case $opt in
+      1)
+        mapfile -t worlds < <(list_worlds)
+        selecionados=()
+        while true; do
+          clear
+          echo "- Selecione mundos para auto-backup (Digite 'b' para sair) -"
+          for i in "${!worlds[@]}"; do
+            mundo="${worlds[$i]}"
+            if [[ " $AUTO_BACKUP_WORLDS " == *"$mundo"* ]]; then
+              echo "$((i+1))) $mundo [✓]"
+            else
+              echo "$((i+1))) $mundo"
+            fi
+          done
+          read -p "> " sel
+          if [[ "$sel" == "b" ]]; then break
+          elif [[ "$sel" =~ ^[0-9]+$ && $sel -ge 1 && $sel -le ${#worlds[@]} ]]; then
+            mundo_selecionado="${worlds[$((sel-1))]}"
+            if [[ " $AUTO_BACKUP_WORLDS " == *"$mundo_selecionado"* ]]; then
+              AUTO_BACKUP_WORLDS=$(echo "$AUTO_BACKUP_WORLDS" | sed "s/\b$mundo_selecionado\b//g")
+            else
+              AUTO_BACKUP_WORLDS+=" $mundo_selecionado"
+            fi
+          fi
+        done
+        echo -e "Salvo!"; sleep 1 ;;
+      2)
+        read -p "Digite o intervalo em segundos: " AUTO_BACKUP_INTERVAL
+        echo -e "Salvo!"; sleep 1 ;;
+      3)
+        AUTO_BACKUP=$( [[ "$AUTO_BACKUP" == "true" ]] && echo "false" || echo "true" )
+        echo -e "Salvo!"; sleep 1 ;;
+      4)
+        if [[ "$AUTO_BACKUP" == "true" ]]; then
+          echo "Backup automático ativo. Pressione Ctrl+C para parar."
+          while true; do
+            for mundo in $AUTO_BACKUP_WORLDS; do
+              backup_world_auto "$mundo"
+            done
+            sleep "$AUTO_BACKUP_INTERVAL"
+          done
+        else
+          echo "Backup automático está desativado nas configurações."
+          sleep 2
+        fi ;;
+      5) save_config; break;;
+      *) echo "Opção inválida."; sleep 1;;
+    esac
+  done
+}
+
+confirm_bcauto() {
+  echo "Tem certeza que deseja executar o backup automático? (S/n)"
+  read -p "Digite: " confirm
+
+  case "$confirm" in
+    [sS]|"")
+      echo "✔ Iniciando backup automático..."
+      ./bcauto.sh
+      ;;
+    [nN])
+      echo "${RED}Backup automático cancelado pelo usuário.${NC}"
+      main_menu
+      ;;
+    *)
+      echo "Entrada inválida. Por favor, responda com S ou N."
+      confirm_bcauto 
+      ;;
+  esac
+
+}
+
+
 # Menu principal
 main_menu() {
   while true; do
     clear
-    echo "===== BackupCraft Minecraft ====="
+    echo "===== BackupCraft ====="
     echo "[1] Fazer backup"
     echo "[2] Restaurar backup"
-    echo "[3] Configurações"
-    echo "[4] Iniciar backup automático (em segundo plano)"
-    echo "[5] Parar backup automático"
-    echo "[6] Limpar backups antigos"
+    echo "[3] Restaurar conquistas"
+    echo "[4] Configurações gerais"
+    echo "[5] Configurações backup automático"
+    echo "[6] Iniciar backup automático"
     echo "[7] Sair"
     read -p "Escolha: " choice
     case $choice in
       1) backup_world ;;
       2) restore_backup ;;
-      3) config_menu ;;
-      4)
-        if [[ "$AUTO_BACKUP" == "true" ]]; then
-          if [[ -f "$HOME/.backupcraft_autobackup.pid" && -d "/proc/$(cat "$HOME/.backupcraft_autobackup.pid")" ]]; then
-            echo -e "${RED}Backup automático já está rodando.${NC}"
-          else
-            auto_backup_loop &
-            echo $! > "$HOME/.backupcraft_autobackup.pid"
-            echo "Backup automático iniciado em segundo plano."
-          fi
-        else
-          echo "Backup automático está desativado nas configurações."
-        fi
-        read -p "Pressione Enter para continuar..."
-        ;;
-      5)
-        if [[ -f "$HOME/.backupcraft_autobackup.pid" ]]; then
-          kill $(cat "$HOME/.backupcraft_autobackup.pid") 2>/dev/null
-          rm -f "$HOME/.backupcraft_autobackup.pid"
-          echo "Backup automático parado."
-        else
-          echo "Backup automático não está rodando."
-        fi
-        read -p "Pressione Enter para continuar..."
-        ;;
-      6) clean_old_backups ;;
+      3) restore_advancements ;;
+      4) config_menu ;;
+      5) bcauto_config_menu ;; # novo menu exclusivo para configurações automáticas
+      6) confirm_bcauto ;;
       7) echo "Saindo..."; exit 0 ;;
       *) echo "Opção inválida."; sleep 1 ;;
     esac

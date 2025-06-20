@@ -1,14 +1,37 @@
 #!/bin/bash
 
-# Dependências necessárias
+# install.sh - Instalador do BackupCraft v1.6
+
+# ==== Boas-vindas e aviso ====
+echo "========================="
+echo " Bem-vindo ao instalador "
+echo "     BackupCraft v1.6     "
+echo "========================="
+echo
+
+echo "A partir desta versão, o script principal se chama 'bchub.sh' e o script de backup automático se chama 'bcauto.sh'."
+echo "Se existirem scripts antigos, como 'backupcraft.sh', eles serão removidos automaticamente."
+echo "Caso tenha utilizado outras versões, todas as suas configurações serão mantidas, exceto as que tiveram modificações ou foram excluídas."
+echo "Sua senha pode ser solicitada durante a instalação caso não execute esse script com 'sudo'"
+echo
+read -p "Pressione Enter para iniciar a instalação ou Ctrl+C para cancelar..."
+
+# ==== Limpeza de scripts antigos ====
+ANTIGOS=("$HOME/backupcraft.sh" "$HOME/install.sh")
+for file in "${ANTIGOS[@]}"; do
+  if [[ -f "$file" ]]; then
+    rm -f "$file"
+    echo "Removido script antigo: $file"
+  fi
+done
+
+# ==== Dependências ====
 DEPENDENCIAS=("tar" "gzip" "bzip2" "xz" "bash" "curl" "wget" "zip" "rsync" "find" "7z" "coreutils")
-
-# Arquivo alvo
-ARQUIVO_ALVO="backupcraft.sh"
-DESTINO="$HOME"
 TARFILE="backupcraft.tar.gz"
+ARQUIVOS_SCRIPTS=("bchub.sh" "bcauto.sh")
+DESTINO="$HOME"
 
-# Detecta se está no Termux
+# Detecta gerenciador de pacotes
 if [ -n "$PREFIX" ] && [[ "$PREFIX" == *"com.termux"* ]]; then
   PKG_MANAGER="pkg"
 elif command -v apt-get &> /dev/null; then
@@ -52,28 +75,28 @@ for dep in "${DEPENDENCIAS[@]}"; do
   fi
 done
 
+# ==== Extração dos arquivos ====
 echo "Verificando arquivos do sistema..."
 mkdir -p "$DESTINO"
 
-echo "Extraindo script..."
+echo "Extraindo scripts..."
 tar -xf "$TARFILE" || { echo "Falha ao extrair o arquivo TAR."; exit 1; }
 
-echo "Aplicando licença..."
-chmod +x "$ARQUIVO_ALVO"
+echo "Aplicando permissões executáveis..."
+for script in "${ARQUIVOS_SCRIPTS[@]}"; do
+  chmod +x "$script"
+  mv "$script" "$DESTINO/"
+  echo "Script instalado: $DESTINO/$script"
+done
 
-echo "Movendo script para '$DESTINO'..."
-mv "$ARQUIVO_ALVO" "$DESTINO/"
-
-echo "Excluindo arquivos temporários..."
-# Caminho absoluto do script atual
+# ==== Limpeza do diretório do instalador ====
 DIR_ATUAL="$(dirname "$(realpath "$0")")"
-
-# Sobe para o diretório pai e remove a pasta do script
 cd ..
 rm -rf "$DIR_ATUAL"
 
-echo "Arquivo '$ARQUIVO_ALVO' movido para '$DESTINO' e tornado executável."
-read -p "Pressione Enter para continuar, este arquivo irá se auto destruir."
+echo "Instalação concluída com sucesso!"
+echo "Use 'bchub.sh' para iniciar o BackupCraft."
+read -p "Pressione Enter para finalizar..."
 
 # Remove o próprio script
 rm -f -- "$0"
