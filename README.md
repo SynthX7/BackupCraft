@@ -16,7 +16,7 @@ O **BackupCraft** é uma ferramenta de terminal simples e eficaz para fazer back
 **Importante:** Não clone este repositório! O download deve ser feito diretamente pelo link acima.
 
 ## Documentação, tutoriais, duvidas, etc.
-Tudo no [nosso site](https://synthx7.github.io/BackupCraft/)
+Tudo no [nosso site](https://synthx7.github.io/BackupCraft/webpage/index.html)
 
 ---
 
