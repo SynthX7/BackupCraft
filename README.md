@@ -13,18 +13,13 @@ O **BackupCraft** é uma ferramenta de terminal simples e eficaz para fazer back
 ---
 
 ## 🌐 Acesse nossa página!
-
 👉 https://i3d.me/backupcraft 👈
+Aqui você irá encontrar todas as informações necessárias sobre como utilizar a ferramenta
+
+## Download da versão mais estável:
+(BackupCraft v1.6 - Linux)[https://github.com/SynthX7/BackupCraft/releases/tag/v1.6]
 
 **Importante:** Não clone este repositório! O download deve ser feito diretamente pelo link acima.
-
----
-
-## Como usar
-
-1. Acesse o link acima
-2. Baixe a versão mais recente para o seu sistema
-3. Siga as instruções para instalar e usar
 
 ---
 
