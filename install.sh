@@ -9,7 +9,6 @@ echo "     BackupCraft v1.6     "
 echo "========================="
 echo
 
-echo "A partir desta versão, o script principal se chama 'bchub.sh' e o script de backup automático se chama 'bcauto.sh'."
 echo "Se existirem scripts antigos, como 'backupcraft.sh', eles serão removidos automaticamente."
 echo "Caso tenha utilizado outras versões, todas as suas configurações serão mantidas, exceto as que tiveram modificações ou foram excluídas."
 echo "Sua senha pode ser solicitada durante a instalação caso não execute esse script com 'sudo'"
