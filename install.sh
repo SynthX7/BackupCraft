@@ -1,11 +1,13 @@
 #!/bin/bash
 
-# install.sh - Instalador do BackupCraft v1.6
+clear
+
+# install.sh - Instalador do BackupCraft v1.6.1
 
 # ==== Boas-vindas e aviso ====
 echo "========================="
 echo " Bem-vindo ao instalador "
-echo "     BackupCraft v1.6     "
+echo "     BackupCraft v1.6.1     "
 echo "========================="
 echo
 
@@ -27,20 +29,24 @@ done
 # ==== Dependências ====
 DEPENDENCIAS=("tar" "gzip" "bzip2" "xz" "bash" "curl" "wget" "zip" "rsync" "find" "7z" "coreutils")
 TARFILE="backupcraft.tar.gz"
-ARQUIVOS_SCRIPTS=("bchub.sh" "bcauto.sh")
-DESTINO="$HOME"
+SCRIPT="bchub.sh"
+if [ -n "${SUDO_USER:-}" ]; then
+  DESTINO=$(eval echo "~$SUDO_USER")
+else
+  DESTINO="$HOME"
+fi
 
 # Detecta gerenciador de pacotes
-if [ -n "$PREFIX" ] && [[ "$PREFIX" == *"com.termux"* ]]; then
+if [ -n "${PREFIX:-}" ] && [[ "$PREFIX" == *"com.termux"* ]]; then
   PKG_MANAGER="pkg"
-elif command -v apt-get &> /dev/null; then
+elif command -v apt-get &>/dev/null; then
   PKG_MANAGER="apt-get"
-elif command -v dnf &> /dev/null; then
+elif command -v dnf &>/dev/null; then
   PKG_MANAGER="dnf"
-elif command -v pacman &> /dev/null; then
+elif command -v pacman &>/dev/null; then
   PKG_MANAGER="pacman"
 else
-  echo "Gerenciador de pacotes não suportado automaticamente."
+  echo "[ERRO] Gerenciador de pacotes não suportado automaticamente."
   exit 1
 fi
 
@@ -66,7 +72,7 @@ instalar_pacote() {
 }
 
 for dep in "${DEPENDENCIAS[@]}"; do
-  if ! command -v "$dep" &> /dev/null; then
+  if ! command -v "$dep" &>/dev/null; then
     echo "Dependência '$dep' não encontrada. Instalando..."
     instalar_pacote "$dep"
   else
@@ -75,27 +81,51 @@ for dep in "${DEPENDENCIAS[@]}"; do
 done
 
 # ==== Extração dos arquivos ====
-echo "Verificando arquivos do sistema..."
-mkdir -p "$DESTINO"
+if [[ ! -f "$TARFILE" ]]; then
+  echo "[ERRO] Arquivo '$TARFILE' não encontrado no diretório atual."
+  exit 1
+fi
 
 echo "Extraindo scripts..."
-tar -xf "$TARFILE" || { echo "Falha ao extrair o arquivo TAR."; exit 1; }
+tar -xf "$TARFILE"
+
+# ==== Permissões e movimentação ====
+if [[ ! -f "$SCRIPT" ]]; then
+  echo "[ERRO] Arquivo $SCRIPT não encontrado após extração."
+  exit 1
+fi
 
 echo "Aplicando permissões executáveis..."
-for script in "${ARQUIVOS_SCRIPTS[@]}"; do
-  chmod +x "$script"
-  mv "$script" "$DESTINO/"
-  echo "Script instalado: $DESTINO/$script"
-done
+chmod +x "$SCRIPT"
+mv "$SCRIPT" "$DESTINO/"
+echo "Script instalado: $DESTINO/$SCRIPT"
 
 # ==== Limpeza do diretório do instalador ====
-DIR_ATUAL="$(dirname "$(realpath "$0")")"
-cd ..
-rm -rf "$DIR_ATUAL"
+echo -e "\nInstalação concluída. Gostaria de apagar os arquivos temporários? Isso inclui o .tar.gz que fez o download) (S/n)"
+read -rp "Digite: " confirm
+
+case "${confirm,,}" in
+s | "")
+  echo "Apagando arquivos..."
+  if [[ -d "../$TEMP_DIR" ]]; then
+    cd ..
+    rm -rf "BackupCraft"
+    rm -rf "BackupCraft-v1.6.1.tar.gz"
+  else
+    echo "[AVISO] Diretório '$TEMP_DIR' não encontrado. Nenhum arquivo removido."
+  fi
+  ;;
+n)
+  ;;
+*)
+  echo "[AVISO] Entrada inválida. Por favor, responda com 's' ou 'n'. Nenhuma ação tomada."
+  ;;
+esac
 
 echo "Instalação concluída com sucesso!"
-echo "Use 'bchub.sh' para iniciar o BackupCraft."
+echo "Siga os proximos passos explicados no site"
 read -p "Pressione Enter para finalizar..."
 
 # Remove o próprio script
 rm -f -- "$0"
+clear
