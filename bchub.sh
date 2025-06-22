@@ -153,7 +153,7 @@ estimate_time_by_size() {
   local path="$1" # Caminho do diretório a ser compactado
   local size_bytes=$(du -sb "$path" | cut -f1)
   local cores=$(nproc)
-  local speed=$((cores * 2000000)) # 2 MB/s por núcleo (estimado)
+  local speed=$((cores * speed))
   local time_sec=$((size_bytes / speed))
 
   # Limite de segurança
@@ -201,10 +201,11 @@ backup_world() {
   echo "Iniciando compressão do backup... (Isso pode demorar um pouco, não cancele)"
   pushd "$tmpdir" >/dev/null || return
   if [[ "$ENABLE_ENCRYPTION" == "true" ]]; then
-    7z a -t7z -p"$ENCRYPTION_PASSWORD" -mhe=on "$zip_path" . >/dev/null &
+    7z a $ARGS -p"$ENCRYPTION_PASSWORD" -mhe=on "$zip_path" . >/dev/null &
   else
-    7z a -t7z "$zip_path" . >/dev/null &
+    7z a $ARGS "$zip_path" . >/dev/null &
   fi
+
   local compress_pid=$!
   popd >/dev/null
 
@@ -283,9 +284,13 @@ select_world() {
 
   echo "===== Mundos Disponíveis ====="
   select world in "${worlds[@]}" "Voltar"; do
-    [[ "$REPLY" == $((${#worlds[@]} + 1)) || "$world" == "Voltar" ]] && return 1
+    if [[ "$REPLY" == $((${#worlds[@]} + 1)) || "$world" == "Voltar" ]]; then
+      return 1
+    fi
     if [[ -n "$world" ]]; then
-      echo "$world"
+      speed=2000000
+      ARGS="-t7z"
+      selected_world="$world" # ← salva em variável global
       return 0
     else
       echo "Opção inválida."
@@ -570,7 +575,6 @@ countdown_timer() {
   echo ""
 }
 
-
 executar_backup_automatico() {
   # Ctrl+C → voltar ao menu principal
   trap 'echo -e "\n${RED}✘ Backup automático interrompido pelo usuário.${NC}"; sleep 1; exit; exit 0' SIGINT
@@ -591,7 +595,7 @@ executar_backup_automatico() {
     return
   fi
 
-  readarray -t worlds <<< "$AUTO_BACKUP_WORLDS"
+  readarray -t worlds <<<"$AUTO_BACKUP_WORLDS"
 
   while true; do
     for world in "${worlds[@]}"; do
@@ -604,13 +608,14 @@ executar_backup_automatico() {
   done
 }
 
-
 confirm_bcauto() {
   echo -e "\nTem certeza que deseja executar o backup automático agora? (S/n)"
   read -rp "Digite: " confirm
 
   case "${confirm,,}" in
   s | "")
+    speed=1000000
+    ARGS="-t7z -mx=1 -mmt=1"
     echo "✔ Iniciando backup automático..."
     sleep 1
     yes "" | executar_backup_automatico
@@ -643,13 +648,14 @@ main_menu() {
     read -p "Escolha: " choice
     case $choice in
     1)
-      world=$(select_world)
-
-      if [[ -n "$world" ]]; then
-        backup_world "$world"
+      select_world
+      if [[ $? -eq 0 && -n "$selected_world" ]]; then
+        echo "Mundo selecionado: '$selected_world'"
+        backup_world "$selected_world"
       else
         echo "❌ Nenhum mundo foi selecionado. Operação cancelada."
       fi
+
       ;;
     2) restore_backup ;;
     3) restore_advancements ;;

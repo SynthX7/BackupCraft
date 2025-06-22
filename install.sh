@@ -2,12 +2,12 @@
 
 clear
 
-# install.sh - Instalador do BackupCraft v1.6.1
+# install.sh - Instalador do BackupCraft v1.6.2
 
 # ==== Boas-vindas e aviso ====
 echo "========================="
 echo " Bem-vindo ao instalador "
-echo "     BackupCraft v1.6.1     "
+echo "     BackupCraft v1.6.2  "
 echo "========================="
 echo
 
@@ -110,7 +110,6 @@ s | "")
   if [[ -d "../$TEMP_DIR" ]]; then
     cd ..
     rm -rf "BackupCraft"
-    rm -rf "BackupCraft-v1.6.1.tar.gz"
   else
     echo "[AVISO] Diretório '$TEMP_DIR' não encontrado. Nenhum arquivo removido."
   fi
