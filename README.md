@@ -12,7 +12,7 @@
 O **BackupCraft** é uma ferramenta de terminal simples e eficaz para fazer backup dos seus mundos do Minecraft. Com ele, você protege suas criações contra perdas acidentais (ou mortes na lava) com apenas algumas teclas!
 
 ### Download da versão mais estável:
-[BackupCraft v1.6.1 - Linux](https://github.com/SynthX7/BackupCraft/releases/tag/v1.6)
+[BackupCraft v1.6.1 - Linux](https://github.com/SynthX7/BackupCraft/releases/tag/v1.6.1)
 
 **Importante:** Não clone este repositório! O download deve ser feito diretamente pelo link acima.
 
