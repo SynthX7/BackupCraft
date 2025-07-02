@@ -1,4 +1,4 @@
-<a href="https://github.com/SynthX7/BackupCraft/">
+<a href="https://github.com/SynthX7/assets/BackupCraft/">
 <p align="center">
   <img src="backupcraft.png" alt="BackupCraft banner">
 </p>
