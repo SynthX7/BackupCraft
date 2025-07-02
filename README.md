@@ -1,6 +1,6 @@
-<a href="https://github.com/SynthX7/assets/BackupCraft/">
+<a href="https://github.com/SynthX7/BackupCraft/">
 <p align="center">
-  <img src="backupcraft.png" alt="BackupCraft banner">
+  <img src="assets/backupcraft.png" alt="BackupCraft banner">
 </p>
 </a>
 <p align="center"><strong>Salve seu mundo. Proteja sua história.</strong></p>
