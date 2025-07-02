@@ -30,6 +30,7 @@ log_action() {
 # Carregar configurações
 load_config() {
   [[ -f "$CONFIG_FILE" ]] || cat >"$CONFIG_FILE" <<EOF
+BACKUP_MODE=""
 MULTIPLE_BACKUPS=true
 REPLACE_ON_RESTORE=false
 IGNORE_BACKUP_WORLD=true
@@ -53,6 +54,7 @@ mkdir -p "$BACKUP_DIR" "$HIDDEN_BACKUP_DIR"
 # Salvar configurações
 save_config() {
   {
+    echo "BACKUP_MODE=$BACKUP_MODE"
     echo "MULTIPLE_BACKUPS=$MULTIPLE_BACKUPS"
     echo "REPLACE_ON_RESTORE=$REPLACE_ON_RESTORE"
     echo "IGNORE_BACKUP_WORLD=$IGNORE_BACKUP_WORLD"
@@ -73,33 +75,25 @@ save_config() {
 
 # Barra de progresso dinâmica ligada ao processo da compressão
 progress_during_compression() {
-  local pid=$1        # PID do processo da compressão
-  local total_time=$2 # Estimativa de tempo em segundos
-  local width=40
-  local elapsed=0
+  local pid=$1   # PID do processo em segundo plano
+  local width=20 # Tamanho da barra visual
 
+  local i=0
   while kill -0 "$pid" 2>/dev/null; do
-    local progress=$elapsed
-    ((progress > total_time)) && progress=$total_time
-    local filled=$((progress * width / total_time))
-    local empty=$((width - filled))
-    local remaining=$((total_time - progress))
-    local percentage=$((progress * 100 / total_time))
-
-    local bar="\e[32m["
-    for ((i = 0; i < filled; i++)); do bar+="█"; done
-    for ((i = 0; i < empty; i++)); do bar+=" "; done
-    bar+="\e[0m] ${percentage}%"
-    bar+=" (${remaining}s restantes)"
-
-    echo -ne "\r$bar"
-
-    sleep 1
-    ((elapsed++))
+    local bar=""
+    for ((j = 0; j < width; j++)); do
+      if ((j < (i % (width + 1)))); then
+        bar+="▰"
+      else
+        bar+="▱"
+      fi
+    done
+    echo -ne "\r\e[32m[$bar ]\e[0m"
+    sleep 0.15
+    ((i++))
   done
 
-  # Finaliza com 100%
-  echo -e "\r\e[32m[${width}█]\e[0m 100% (0s restantes)\n"
+  echo -e "\r\e[32m[▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰ ]\e[0m\n"
 }
 
 # Verifica se pasta é mundo válido
@@ -153,8 +147,9 @@ estimate_time_by_size() {
   local path="$1" # Caminho do diretório a ser compactado
   local size_bytes=$(du -sb "$path" | cut -f1)
   local cores=$(nproc)
-  local speed=$((cores * speed))
-  local time_sec=$((size_bytes / speed))
+  local base_speed=5000000 # 5 MB/s por core (ajuste conforme necessário)
+  local total_speed=$((cores * base_speed))
+  local time_sec=$((size_bytes / total_speed))
 
   # Limite de segurança
   ((time_sec < 5)) && time_sec=5
@@ -208,10 +203,9 @@ backup_world() {
 
   local compress_pid=$!
   popd >/dev/null
-
   local time_sec
   time_sec=$(estimate_time_by_size "$tmpdir")
-  progress_during_compression "$compress_pid" "$time_sec"
+  progress_during_compression "$compress_pid"
   wait "$compress_pid"
   local backup_status=$?
   rm -rf "$tmpdir"
@@ -246,10 +240,11 @@ backup_world() {
   echo -e "${GREEN}Backup criado com sucesso em: $zip_path${NC}"
   log_action "Backup criado: $backup_name/${world}.7z"
 
-  # === Backup oculto completo ===
+  # === Backup oculto ===
   if [[ "$ENABLE_HIDDEN_BACKUP" == "true" ]]; then
     echo "Backup principal finalizado"
-    echo "Criando backup oculto completo... (Isso pode demorar um pouco, não cancele)"
+    echo "Criando backup oculto... (Isso pode demorar um pouco, não cancele)"
+
     local hidden_dir="$HIDDEN_BACKUP_DIR/${world}_hidden"
     rm -rf "$hidden_dir"
     mkdir -p "$HIDDEN_BACKUP_DIR"
@@ -259,11 +254,19 @@ backup_world() {
     rm -f "$hidden_zip"
 
     pushd "$HIDDEN_BACKUP_DIR" >/dev/null || return
+
+    # Inicia compressão em segundo plano
     if [[ "$ENABLE_ENCRYPTION" == "true" ]]; then
-      7z a -t7z -p"$ENCRYPTION_PASSWORD" -mhe=on "$hidden_zip" "${world}_hidden" >/dev/null
+      7z a $ARGS -p"$ENCRYPTION_PASSWORD" -mhe=on "$hidden_zip" "${world}_hidden" >/dev/null &
     else
-      7z a -t7z "$hidden_zip" "${world}_hidden" >/dev/null
+      7z a $ARGS "$hidden_zip" "${world}_hidden" >/dev/null &
     fi
+
+    local compress_pid=$!
+    progress_during_compression "$compress_pid"
+    wait "$compress_pid"
+    local backup_status=$?
+
     popd >/dev/null
     rm -rf "$hidden_dir"
 
@@ -288,7 +291,7 @@ select_world() {
       return 1
     fi
     if [[ -n "$world" ]]; then
-      speed=2000000
+      base_speed=2000000
       ARGS="-t7z"
       selected_world="$world" # ← salva em variável global
       return 0
@@ -488,11 +491,43 @@ config_menu() {
 
 formatar_tempo() {
   local s=$1
+  local unit
+  local value
+
   if ((s < 60)); then
-    echo "$s segundos"
+    value=$s
+    unit="segundo"
   elif ((s < 3600)); then
-    echo "$((s / 60)) minutos"
-  else echo "$((s / 3600))h $(((s % 3600) / 60))m"; fi
+    value=$((s / 60))
+    unit="minuto"
+  elif ((s < 86400)); then
+    value=$((s / 3600))
+    unit="hora"
+  elif ((s < 604800)); then
+    value=$((s / 86400))
+    unit="dia"
+  elif ((s < 2592000)); then # 30 dias aproximadamente
+    value=$((s / 604800))
+    unit="semana"
+  elif ((s < 31536000)); then # 365 dias aproximadamente
+    value=$((s / 2592000))
+    unit="mês"
+  else
+    value=$((s / 31536000))
+    unit="ano"
+  fi
+
+  # Pluraliza a unidade se value for diferente de 1
+  if ((value == 1)); then
+    echo "1 $unit"
+  else
+    # para plural, geralmente basta adicionar 's' no português, exceto "mês" que vira "meses"
+    if [[ "$unit" == "mês" ]]; then
+      echo "$value meses"
+    else
+      echo "$value ${unit}s"
+    fi
+  fi
 }
 
 bcauto_config_menu() {
@@ -500,8 +535,34 @@ bcauto_config_menu() {
     clear
     echo "===== Configuração do Backup Automático ====="
     echo "[1] Selecionar mundos"
-    echo "[2] Frequência: $(formatar_tempo "$AUTO_BACKUP_INTERVAL")"
-    echo "[3] Voltar"
+
+    if [[ ("$value" -ge 10 && "$unit" == "minuto") || (\
+      "$value" -ge 1 && "$unit" == "hora") || (\
+      "$value" -ge 1 && "$unit" == "dia") || (\
+      "$value" -ge 1 && "$unit" == "mês") || (\
+      "$value" -ge 1 && "$unit" == "ano") ]]; then
+
+      echo "[2] Frequência: $(formatar_tempo "$AUTO_BACKUP_INTERVAL") <- Lembre-se que backup de mundos grandes podem levar de 1 à 5 minutos."
+    else
+
+      echo "[2] Frequência: $(formatar_tempo "$AUTO_BACKUP_INTERVAL")"
+    fi
+
+    if [[ -z "$BACKUP_MODE" ]]; then
+      mode_text="indefinido"
+    elif [[ "$BACKUP_MODE" == "minimo" ]]; then
+      mode_text="Desempenho mínimo"
+    elif [[ "$BACKUP_MODE" == "medio" ]]; then
+      mode_text="Desempenho médio"
+    elif [[ "$BACKUP_MODE" == "maximo" ]]; then
+      mode_text="Desempenho máximo"
+    else
+      mode_text="inválido"
+    fi
+
+    echo "[3] Modo de desempenho do backup automático: $mode_text"
+
+    echo "[4] Voltar"
     read -p "> " opt
     case "$opt" in
     1)
@@ -551,6 +612,19 @@ bcauto_config_menu() {
       sleep 1
       ;;
     3)
+      echo "Selecione o modo de desempenho:"
+      echo "[1] Desempenho mínimo"
+      echo "[2] Desempenho médio"
+      echo "[3] Desempenho máximo"
+      read -rp "Escolha: " escolha_modo
+      case "$escolha_modo" in
+      1) BACKUP_MODE="minimo" ;;
+      2) BACKUP_MODE="medio" ;;
+      3) BACKUP_MODE="maximo" ;;
+      *) echo "Opção inválida." && sleep 1 ;;
+      esac
+      ;;
+    4)
       save_config
       break
       ;;
@@ -576,6 +650,8 @@ countdown_timer() {
 }
 
 executar_backup_automatico() {
+  echo -e "[INFO] Modo de desempenho: ${YELLOW}$BACKUP_MODE${NC}"
+
   # Ctrl+C → voltar ao menu principal
   trap 'echo -e "\n${RED}✘ Backup automático interrompido pelo usuário.${NC}"; sleep 1; exit; exit 0' SIGINT
 
@@ -612,10 +688,28 @@ confirm_bcauto() {
   echo -e "\nTem certeza que deseja executar o backup automático agora? (S/n)"
   read -rp "Digite: " confirm
 
+  case "$BACKUP_MODE" in
+  "minimo")
+    ARGS="-t7z -mx=1 -mmt=on"
+    base_speed=2000000
+    ;;
+  "medio")
+    ARGS="-t7z -mx=5 -mmt=on"
+    base_speed=1500000
+    ;;
+  "maximo")
+    ARGS="-t7z -mx=9 -mmt=off"
+    base_speed=8000000
+    ;;
+  *)
+    ARGS="-t7z -mx=1 -mmt=on"
+    base_speed=2000000
+    ;;
+  esac
+
   case "${confirm,,}" in
   s | "")
-    speed=1000000
-    ARGS="-t7z -mx=1 -mmt=1"
+    base_speed=1000000
     echo "✔ Iniciando backup automático..."
     sleep 1
     yes "" | executar_backup_automatico
@@ -637,7 +731,7 @@ confirm_bcauto() {
 main_menu() {
   while true; do
     clear
-    echo "===== BackupCraft Hub ====="
+    echo "===== BackupCraft Hub 1.6.3 ====="
     echo "[1] Fazer backup"
     echo "[2] Restaurar backup"
     echo "[3] Restaurar conquistas"
@@ -660,7 +754,7 @@ main_menu() {
     2) restore_backup ;;
     3) restore_advancements ;;
     4) config_menu ;;
-    5) bcauto_config_menu ;; # novo menu exclusivo para configurações automáticas
+    5) bcauto_config_menu ;;
     6) confirm_bcauto ;;
     7)
       echo "Saindo..."

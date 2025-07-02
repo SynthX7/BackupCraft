@@ -2,17 +2,16 @@
 
 clear
 
-# install.sh - Instalador do BackupCraft v1.6.2
+# install.sh - Instalador do BackupCraft v1.6.3
 
 # ==== Boas-vindas e aviso ====
 echo "========================="
 echo " Bem-vindo ao instalador "
-echo "     BackupCraft v1.6.2  "
+echo "  BackupCraft v1.6.3  "
 echo "========================="
 echo
 
-echo "Se existirem scripts antigos, como 'backupcraft.sh', eles serão removidos automaticamente."
-echo "Caso tenha utilizado outras versões, todas as suas configurações serão mantidas, exceto as que tiveram modificações ou foram excluídas."
+echo "Se existirem scripts antigos, eles serão removidos automaticamente."
 echo "Sua senha pode ser solicitada durante a instalação caso não execute esse script com 'sudo'"
 echo
 read -p "Pressione Enter para iniciar a instalação ou Ctrl+C para cancelar..."
