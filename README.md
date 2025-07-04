@@ -32,3 +32,5 @@ Você pode ajudar de várias formas:
 - Traduzindo para outros idiomas
 
 Envie um Pull Request ou abra uma Issue com sua sugestão!
+
+> A marca e estilo visual do Minecraft pertencem à Mojang Studios/Microsoft. O projeto BackupCraft é independente e não possui afiliação oficial.
