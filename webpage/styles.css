@@ -24,7 +24,7 @@ body {
       rgba(0, 0, 0, 0.877) 40%,
       rgba(0, 0, 0, 0) 60%
     ),
-    url("/assets/banner.jpg") no-repeat center center fixed;
+    url("/BackupCraft/webpage/assets/banner.jpg") no-repeat center center fixed;
   background-size: cover;
   color: var(--text);
   line-height: 1.6;
