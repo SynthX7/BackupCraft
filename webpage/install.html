@@ -1,20 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Installation guide for BackupCraft to backup and restore Minecraft worlds."
-    />
-    <meta
-      name="keywords"
-      content="BackupCraft, Minecraft, installation, guide"
-    />
-    <title>BackupCraft - Installation Guide</title>
-    <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="BackupCraft: Lightweight, free tool to backup and restore Minecraft worlds safely and efficiently." />
+  <meta name="keywords" content="BackupCraft, Minecraft, backup, restore, Linux, open-source" />
+  <meta name="author" content="Syntax Echonomics" />
+
+  <!-- Segurança e indexação -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests;">
+  <meta name="robots" content="index, follow" />
+  <meta name="referrer" content="no-referrer" />
+
+  <!-- Social (opcional, para visualização em compartilhamentos) -->
+  <meta property="og:title" content="BackupCraft - Minecraft Backup Tool" />
+  <meta property="og:description" content="Protect your Minecraft worlds with automated backups. 100% free, safe and open-source." />
+  <meta property="og:image" content="https://synthx7.github.io/BackupCraft/webpage/assets/BC_logo.png" />
+  <meta property="og:url" content="https://synthx7.github.io/BackupCraft/" />
+  <meta property="og:type" content="website" />
+
+  <title>BackupCraft - Installation</title>
+  <link rel="stylesheet" href="styles/styles.css" />
+  <link rel="stylesheet" href="styles/install.css" />
+  <link rel="stylesheet" href="styles/loader.css" />
+  <link rel="icon" href="assets/flavicon.ico" type="image/x-icon" />
+  
   </head>
   <body>
+
+ <div id="loader">
+  <img src="assets/loader.gif" alt="Loading..." class="loader-gif" />
+  <p id="loader-text"></p>
+</div>
+
+
     <header>
       <nav role="navigation" aria-label="Main navigation">
         <a href="index.html">Home</a>
@@ -25,78 +43,66 @@
       </nav>
     </header>
     <main>
-      <section class="hero">
-        <h1>Installation Guide</h1>
-        <p>
-          Follow these steps to install BackupCraft and keep your Minecraft
-          worlds safe.
-        </p>
-      </section>
-      <section class="content-grid">
-        <div class="content-card">
-          <h2>How to Install BackupCraft</h2>
-          <ol>
-            <li>
-              Download the latest version from the
-              <a
-                href="https://github.com/SynthX7/BackupCraft"
-                target="_blank"
-                >GitHub repository</a
-              >.
-            </li>
-            <li>
-              Extract the downloaded archive (.zip or .tar.gz) anywhere you
-              like.
-            </li>
-            <li>Open a terminal and navigate to the extracted folder:</li>
-            <pre><code>cd ~/Downloads/BackupCraft</code></pre>
-            <li>Run the installation script:</li>
-            <pre><code>./install.sh</code></pre>
-            <li>
-              The installer will automatically:
-              <ul>
-                <li>
-                  Install all required dependencies (like <code>7zip</code>,
-                  <code>jq</code>, etc.);
-                </li>
-                <li>
-                  Move the necessary files to your <code>~/</code> home
-                  directory;
-                </li>
-                <li>Make BackupCraft ready to use right away.</li>
-              </ul>
-            </li>
-            <li>
-              Once installed, simply run the program from the terminal using:
-            </li>
-            <pre><code>./bchub.sh</code></pre>
-          </ol>
-        </div>
-      </section>
-      <section class="content-grid">
-        <div class="content-card">
-          <h2>Video Tutorial</h2>
-          <p>Watch our step-by-step installation guide:</p>
-          <!-- Placeholder para vídeo -->
-          <iframe
-            width="100%"
-            height="315"
-            src="https://www.youtube.com/embed/VIDEO_ID"
-            title="BackupCraft Installation Tutorial"
-            frameborder="0"
-            allowfullscreen
-          ></iframe>
-        </div>
-      </section>
-    </main>
+  <section class="install-hero">
+    <h1>Installation Guide</h1>
+    <p>
+      Follow these simple steps to install BackupCraft and protect your Minecraft worlds automatically.
+    </p>
+  </section>
+
+  <section class="install-content">
+    <div class="install-card">
+      <h2>How to Install BackupCraft (Linux)</h2>
+      <ol>
+        <li>
+          Download the latest version from the 
+          <a href="https://github.com/SynthX7/BackupCraft/releases" target="_blank">GitHub repository</a>. (It's not recommended to use any version above 1.6.1).
+        </li>
+        <li>
+          Extract the downloaded archive (verify the version):
+          <pre><code class="code">tar -xvzf ~/Downloads/BackupCraft-v1.6.3.tar.gz</code></pre>
+        </li>
+        
+        <li>
+          Open your terminal and navigate to the folder:
+          <pre><code class="code">cd ~/Downloads/BackupCraft</code></pre>
+        </li>
+        <li>
+          Allow the permissions:
+          <pre><code class="code">chmod +x install.sh</code></pre>
+        </li>
+        <li>
+          Run the installation script:
+          <pre><code class="code">./install.sh</code></pre>
+        </li>
+        <li>
+          The installer will:
+          <ul>
+            <li>Install required dependencies (<code class="minicode">7zip</code>, <code class="minicode">jq</code>, etc.)</li>
+            <li>Move core files to your home directory</li>
+            <li>Prepare everything for immediate use</li>
+          </ul>
+        </li>
+        <li>
+          Once installed, run the app in your home folder (<code class="minicode">~</code>) with:
+          <pre><code class="code">./bchub.sh</code></pre>
+        </li>
+      </ol>
+    </div>
+
+    <div class="install-card">
+      <h2>Video Tutorial</h2>
+      <p>Coming soon...</p>
+      <iframe src="https://www.youtube.com/embed/VIDEO_ID" title="BackupCraft Installation Tutorial" allowfullscreen></iframe>
+    </div>
+  </section>
+</main>
     <footer>
       <p>© 2025 Syntax Echonomics. All rights reserved.</p>
       <div class="social-links">
-        <a href="#" target="_blank" rel="noopener">Discord</a>
-        <a href="#" target="_blank" rel="noopener">Reddit</a>
         <a href="#" target="_blank" rel="noopener">Instagram</a>
-        <a href="#" target="_blank" rel="noopener">TikTok</a>
       </div>
     </footer>
+    <script src="scripts/loader.js"></script>
   </body>
 </html>

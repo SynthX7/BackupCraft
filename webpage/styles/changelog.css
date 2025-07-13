@@ -1,0 +1,171 @@
+/* changelog.css */
+
+/* Estilo da seção principal */
+main {
+  padding: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.hero {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text);
+}
+
+.hero h1 {
+  font-size: 2.5rem;
+  color: #333;
+}
+
+.hero p {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  font-size: 0.9rem;
+  color: #888;
+  margin-bottom: 1.5rem;
+}
+
+.breadcrumbs a {
+  text-decoration: none;
+  color: #3498db;
+}
+
+.breadcrumbs a:hover {
+  text-decoration: underline;
+}
+
+/* Cards da tabela */
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.content-card {
+  background-color: #fff;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.209);
+}
+
+/* Cards da seção de changelog */
+.changelog-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.changelog-entry h2 {
+  font-size: 1.4rem;
+  margin-bottom: 0.5rem;
+  color: #2c3e50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.changelog-entry .date {
+  font-size: 0.9rem;
+  font-weight: normal;
+  color: #999;
+}
+
+.changelog-entry ul {
+  padding-left: 1.25rem;
+  margin: 0;
+}
+
+.changelog-entry ul li {
+  margin-bottom: 0.5rem;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .changelog-entry h2 {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+
+  .changelog-entry .date {
+    font-size: 0.85rem;
+  }
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .hero h1 {
+    font-size: 2rem;
+  }
+
+  table,
+  thead,
+  tbody,
+  th,
+  td,
+  tr {
+    display: block;
+  }
+
+  th {
+    display: none;
+  }
+
+  td {
+    position: relative;
+    padding-left: 50%;
+    margin-bottom: 1rem;
+  }
+
+  td::before {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 45%;
+    font-weight: bold;
+    color: #999;
+    white-space: nowrap;
+  }
+
+  td:nth-of-type(1)::before {
+    content: "Version";
+  }
+
+  td:nth-of-type(2)::before {
+    content: "Date";
+  }
+
+  td:nth-of-type(3)::before {
+    content: "Changes";
+  }
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+main {
+  flex: 1;
+  padding: 20px;
+}
+
+footer {
+  background: #000000;
+  color: white;
+  text-align: center;
+  padding: 10px;
+}

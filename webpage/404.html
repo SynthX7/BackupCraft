@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles/loader.css">
+    <link rel="stylesheet" href="styles/404.css">
+    <link rel="icon" href="assets/flavicon.ico" type="image/x-icon" />
+    <title>404! You Died</title>
+  </head>
+  <body>
+    <div id="loader">
+      <img src="assets/loader.gif" alt="Loading..." class="loader-gif" />
+      <p id="loader-text"></p>
+    </div>
+
+    <div class="main-content">
+
+    <h1>404!</h1>
+    <p class="why">Steve doesn’t found this page.</p>
+    <p class="score">Score:<span class="score-number">0</span></p>
+
+    <div class="mainBtn" onclick="history.back()">
+      <div class="textBtn">Respawn</div>
+    </div>
+
+    <div class="mainBtn" onclick="window.location.href='/'">
+      <div class="textBtn">Title Screen</div>
+    </div>
+    </div>
+    <script src="scripts/loader.js"></script>
+  </body>
+</html>
