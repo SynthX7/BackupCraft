@@ -1,0 +1,169 @@
+@import url("https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Jersey+10&family=Pixelify+Sans:wght@400..700&display=swap");
+
+@font-face {
+  font-family: "Minecraft Regular";
+  src: url("/assets/font/minecraft-regular.eot?");
+  src: url("/assets/font/minecraft-regular.eot?#iefix")
+      format("embedded-opentype"),
+    url("/assets/font/minecraft-regular.woff") format("woff"),
+    url("/assets/font/minecraft-regular.ttf") format("truetype"),
+    url("/assets/font/minecraft-regular.svg#Minecraft") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+
+body {
+  background: linear-gradient(
+      to top,
+      rgb(0, 0, 0),
+      rgba(0, 0, 0, 0.877) 40%,
+      rgba(0, 0, 0, 0) 60%
+    ),
+    url("/assets/banner.jpg") no-repeat center center fixed;
+}
+
+.home_hero {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--text);
+  border-radius: var(--radius);
+  max-width: 900px;
+  margin: 3rem auto 5rem auto;
+}
+
+.homelogo {
+  max-width: 520px;
+  width: 100%;
+  margin-bottom: 1.5rem;
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.3));
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.home_hero p {
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin: 0 auto 2rem auto;
+  color: white;
+  font-family: "Minecraft Regular", sans-serif;
+}
+
+/* Botão principal */
+.btn {
+  display: inline-block;
+  background-color: #1558ff;
+  color: #fff;
+  padding: 1rem 2.5rem;
+  font-weight: 700;
+  border-radius: var(--radius);
+  text-decoration: none;
+  font-size: 1.2rem;
+  transition: background-color 0.3s ease, transform 0.2s ease,
+    box-shadow 0.4s ease;
+  user-select: none;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+}
+
+.btn:hover {
+  background-color: #003ed9;
+  transform: scale(1.05);
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.526);
+}
+
+/* Grid de funcionalidades */
+.features-grid-home {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+  padding: 0 1rem 4rem 1rem;
+  max-width: 1100px;
+  margin: 0 auto 6rem auto;
+}
+
+.feature-card-home {
+  background-color: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 2.5rem 1.8rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.3s ease, box-shadow 0.4s ease;
+  cursor: default;
+}
+
+.feature-card-home:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+}
+
+.feature-card-home .icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.feature-card-home h3 {
+  font-family: "Minecraft Regular", sans-serif;
+  margin: 0.8rem 0 1.2rem;
+  color: var(--primary);
+}
+
+.feature-card-home p {
+  color: var(--text);
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+/* Seção de recursos */
+.resources {
+  text-align: center;
+  padding: 2rem 1rem 5rem 1rem;
+  background-color: #ffffff00;
+  max-width: 900px;
+  margin: 0 auto 6rem auto;
+  box-shadow: var(--shadow);
+}
+
+.resources h2 {
+  color: #e6e6e6;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+}
+
+.resources a {
+  margin: 0 0.6rem;
+  font-weight: 700;
+  color: #6691ff;
+  text-decoration: none;
+  font-size: 1.1rem;
+  transition: color 0.3s ease;
+}
+
+.resources a:hover {
+  color: #3870ff;
+  text-decoration: underline;
+}
+
+/* Responsividade */
+@media (max-width: 720px) {
+  .features-grid-home {
+    grid-template-columns: 1fr;
+    padding: 0 1rem 3rem 1rem;
+  }
+
+  .home_hero {
+    padding: 3rem 1rem 4rem 1rem;
+  }
+}

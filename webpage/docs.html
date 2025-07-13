@@ -1,85 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Technical documentation for BackupCraft, including version details and usage.">
-    <meta name="keywords" content="BackupCraft, Minecraft, documentation, technical">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BackupCraft documentation for all released versions."
+    />
+    <meta name="author" content="Syntax Echonomics" />
     <title>BackupCraft - Documentation</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <link rel="stylesheet" href="styles/loader.css" />
+    <link rel="stylesheet" href="styles/docs.css" />
+    <link rel="icon" href="assets/flavicon.ico" type="image/x-icon" />
+  </head>
+  <body style="background-color: white;">
+    
+    <div id="loader">
+      <img src="assets/loader.gif" alt="Loading..." class="loader-gif" />
+      <p id="loader-text"></p>
+    </div>
+
     <header>
-        <nav role="navigation" aria-label="Main navigation">
-            <a href="index.html">Home</a>
-            <a href="install.html">Install</a>
-            <a href="docs.html" aria-current="page" class="active">Docs</a>
-            <a href="changelog.html">Changelog</a>
-            <a href="contact.html">Contact</a>
-        </nav>
+      <nav>
+        <a href="index.html">Home</a>
+        <a href="install.html">Install</a>
+        <a href="docs.html" class="active" aria-current="page">Docs</a>
+        <a href="changelog.html">Changelog</a>
+        <a href="contact.html">Contact</a>
+      </nav>
     </header>
-    <main>
-        <section class="hero">
-            <h1>Technical Documentation</h1>
-            <p>Explore the detailed documentation for BackupCraft versions.</p>
-        </section>
-        <nav class="breadcrumbs">
-            <a href="index.html">Home</a> > <a href="docs.html">Docs</a>
-        </nav>
-        <section class="content-grid">
-            <div class="content-card">
-                <h2>Table of Contents</h2>
-                <ul>
-                    <li><a href="#v1.6.3">Version 1.6.3</a></li>
-                    <li><a href="#v1.6.2">Version 1.6.2</a></li>
-                    <li><a href="#v1.6.1">Version 1.6.1</a></li>
-                    <li><a href="#v1.6.0">Version 1.6.0</a></li>
-                </ul>
-            </div>
-            <div class="content-card">
-                <h2 id="v1.6.3">Version 1.6.3</h2>
-                <p>Details for version 1.6.3, including performance modes and bug fixes.</p>
-                <ul>
-                    <li>Added backup performance modes: minimum, medium, maximum.</li>
-                    <li>Improved FPS performance during backup.</li>
-                    <li>Fixed bug with hidden backup optimization.</li>
-                    <li>Backup achievements handling improved.</li>
-                </ul>
-            </div>
-            <div class="content-card">
-                <h2 id="v1.6.2">Version 1.6.2</h2>
-                <p>Details for version 1.6.2, introducing automation and UI improvements.</p>
-                <ul>
-                    <li>Introduced backup automatic scheduling.</li>
-                    <li>Added configuration file support.</li>
-                    <li>Basic UI improvements.</li>
-                </ul>
-            </div>
-            <div class="content-card">
-                <h2 id="v1.6.1">Version 1.6.1</h2>
-                <p>Details for version 1.6.1, initial public release.</p>
-                <ul>
-                    <li>Initial public release.</li>
-                    <li>Supports basic manual backups and restores.</li>
-                </ul>
-            </div>
-            <div class="content-card">
-                <h2 id="v1.6.0">Version 1.6.0</h2>
-                <p>Details for version 1.6.0, foundational release.</p>
-                <ul>
-                    <li>Initial development version.</li>
-                </ul>
-            </div>
-        </section>
+
+    <main class="docs-home">
+      <aside class="sidebar">
+        <h2>Documentation Versions</h2>
+        <ul>
+          <li><a href="docs/161.html">Version 1.6.3</a></li>
+          <li><a href="docs/162.html">Version 1.6.2</a></li>
+          <li><a href="docs/161.html">Version 1.6.1</a></li>
+        </ul>
+      </aside>
+
+      <section class="doc-index">
+        <h1>BackupCraft Documentation</h1>
+        <p>
+          Select a version from the left to view full technical documentation.
+        </p>
+
+        <p>
+          This documentation includes usage, commands, backup structure,
+          configuration examples, and changelogs specific to each release.
+        </p>
+      </section>
     </main>
+
     <footer>
-        <p>© 2025 Syntax Echonomics. All rights reserved.</p>
-        <div class="social-links">
-            <a href="#" target="_blank" rel="noopener">Discord</a>
-            <a href="#" target="_blank" rel="noopener">Reddit</a>
-            <a href="#" target="_blank" rel="noopener">Instagram</a>
-            <a href="#" target="_blank" rel="noopener">TikTok</a>
-        </div>
+      </p>
+      <p>© 2025 Syntax Echonomics. All rights reserved.</p>
+      <div class="social-links">
+        <a href="#" target="_blank" rel="noopener">Instagram</a>
+      </div>
+      <script src="scripts/loader.js"></script>
     </footer>
-</body>
+    <script src="scripts/loader.js"></script>
+  </body>
 </html>

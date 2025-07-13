@@ -1,0 +1,119 @@
+      @font-face {
+        font-family: "Minecraft Regular";
+        src: url("/assets/font/minecraft-regular.eot?");
+        src: url("/assets/font/minecraft-regular.eot?#iefix")
+            format("embedded-opentype"),
+          url("/assets/font/minecraft-regular.woff") format("woff"),
+          url("/assets/font/minecraft-regular.ttf") format("truetype"),
+          url("/assets/font/minecraft-regular.svg#Minecraft") format("svg");
+        font-weight: normal;
+        font-style: normal;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+      }
+
+      body {
+  font-family: "Minecraft Regular", sans-serif;
+  background-color: #2e0000;
+  color: #fff;
+  height: 100%;
+  width: 100%;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1rem;
+  background: linear-gradient(
+    to top,
+    rgb(0, 0, 0),
+    rgba(0, 0, 0, 0.329) 40%,
+    rgba(0, 0, 0, 0) 60%
+  );
+  min-height: 100vh;
+}
+
+
+      h1 {
+        font-size: clamp(3rem, 10vw, 6rem);
+        color: rgb(255, 255, 255);
+        text-shadow: 7px 7px 0 #3b3b3b;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        font-size: clamp(1rem, 4vw, 1.5rem);
+        text-shadow: 3px 3px 0 #3b3b3b;
+      }
+
+      .why {
+        margin-bottom: 2rem;
+        margin-top: 1rem;
+      }
+
+      .mainBtn {
+        width: 100%;
+        max-width: 530px;
+        margin-bottom: 1rem;
+        border: 2px solid #000;
+        box-shadow: inset -2px -4px #0006, inset 2px 2px #fff7;
+        background: #999
+          url("https://i48.servimg.com/u/f48/18/06/99/75/bgbtn10.png");
+        background-size: cover;
+        background-position: center;
+        color: #ddd;
+        font-weight: 100;
+        text-align: center;
+        font-size: clamp(1rem, 4vw, 1.4rem);
+        cursor: pointer;
+        image-rendering: pixelated;
+        transition: transform 0.1s ease;
+      }
+
+      .textBtn {
+        padding: 10px;
+      }
+
+      .mainBtn:hover .textBtn {
+        background-color: rgba(100, 100, 255, 0.45);
+        color: #ffff7c;
+      }
+
+      .score {
+        padding-bottom: 5rem;
+      }
+
+      .score-number {
+        color: rgb(255, 231, 13);
+        padding-left: 10px;
+      }
+
+      /* Responsividade específica */
+      @media (max-width: 480px) {
+        .textBtn {
+          padding: 12px 8px;
+        }
+
+        .mainBtn {
+          font-size: 1.2rem;
+        }
+      }
+
+      @media (min-height: 700px) {
+        body {
+          padding-top: 5vh;
+        }
+      }

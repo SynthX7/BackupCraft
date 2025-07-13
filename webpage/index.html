@@ -5,19 +5,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="BackupCraft: Lightweight, free tool to backup and restore Minecraft worlds."
+      content="BackupCraft: Lightweight, free tool to backup and restore Minecraft worlds safely and efficiently."
     />
     <meta
       name="keywords"
-      content="BackupCraft, Minecraft, backup, restore, Linux"
+      content="BackupCraft, Minecraft, backup, restore, Linux, open-source"
     />
-    <title>BackupCraft - Home</title>
-    <link rel="stylesheet" href="styles.css" />
-    <link rel="stylesheet" href="home.css" />
+    <meta name="author" content="Syntax Echonomics" />
 
-    <link rel="icon" href="/BackupCraft/webpage/assets/flavicon.ico" type="image/x-icon" />
+    <!-- Segurança e indexação -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests;"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="referrer" content="no-referrer" />
+
+    <!-- Social (opcional, para visualização em compartilhamentos) -->
+    <meta property="og:title" content="BackupCraft - Minecraft Backup Tool" />
+    <meta
+      property="og:description"
+      content="Protect your Minecraft worlds with automated backups. 100% free, safe and open-source."
+    />
+    <meta
+      property="og:image"
+      content="https://synthx7.github.io/BackupCraft/webpage/assets/BC_logo.png"
+    />
+    <meta property="og:url" content="https://synthx7.github.io/BackupCraft/" />
+    <meta property="og:type" content="website" />
+
+    <title>BackupCraft - Home</title>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <link rel="stylesheet" href="styles/home.css" />
+    <link rel="stylesheet" href="styles/loader.css" />
+    <link rel="icon" href="assets/flavicon.ico" type="image/x-icon" />
   </head>
   <body>
+    <div id="loader">
+      <img src="assets/loader.gif" alt="Loading..." class="loader-gif" />
+      <p id="loader-text"></p>
+    </div>
+
     <header>
       <nav role="navigation" aria-label="Main navigation">
         <a href="index.html" aria-current="page" class="active">Home</a>
@@ -29,7 +57,11 @@
     </header>
     <main>
       <section class="home_hero">
-        <img src="/BackupCraft/webpage/assets/backupcraft_logo.png" class="homelogo" />
+        <img
+          src="assets/backupcraft.png"
+          alt="BackupCraft Logo"
+          class="homelogo"
+        />
         <p>
           Protect your Minecraft worlds with automatic and manual backups –
           lightweight, fast, and free.
@@ -38,6 +70,7 @@
           <a href="install.html" class="btn">Download Latest Version</a>
         </div>
       </section>
+
       <section class="features-grid-home">
         <div class="feature-card-home">
           <span class="icon">💾</span>
@@ -80,21 +113,26 @@
           <span class="icon">🪶</span>
           <h3>Lightweight Design</h3>
           <p>
-            Extremely minimal CPU and RAM usage. Great for low-end PCs or background
-            operation.
+            Extremely minimal CPU and RAM usage. Great for low-end PCs or
+            background operation.
           </p>
         </div>
       </section>
+
       <section class="resources">
         <h2>Documentation & Resources</h2>
         <a href="install.html">Installation Guide</a> ·
         <a href="docs.html">Full Documentation</a> ·
         <a href="changelog.html">Changelog</a> ·
-        <a href="https://github.com/backupcraft" target="_blank" rel="noopener"
+        <a
+          href="https://github.com/backupcraft"
+          target="_blank"
+          rel="nofollow noopener"
           >GitHub</a
         >
       </section>
     </main>
+
     <footer>
       <p>
         Background credit: <strong>Mariana Salimena</strong> -
@@ -107,11 +145,9 @@
       </p>
       <p>© 2025 Syntax Echonomics. All rights reserved.</p>
       <div class="social-links">
-        <a href="#" target="_blank" rel="noopener">Discord</a>
-        <a href="#" target="_blank" rel="noopener">Reddit</a>
         <a href="#" target="_blank" rel="noopener">Instagram</a>
-        <a href="#" target="_blank" rel="noopener">TikTok</a>
       </div>
+      <script src="scripts/loader.js"></script>
     </footer>
   </body>
 </html>

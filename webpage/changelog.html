@@ -1,84 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Changelog for BackupCraft, detailing updates and improvements.">
-    <meta name="keywords" content="BackupCraft, Minecraft, changelog, updates">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BackupCraft: Lightweight, free tool to backup and restore Minecraft worlds safely and efficiently."
+    />
+    <meta
+      name="keywords"
+      content="BackupCraft, Minecraft, backup, restore, Linux, open-source"
+    />
+    <meta name="author" content="Syntax Echonomics" />
+
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests;"
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="referrer" content="no-referrer" />
+
+    <meta property="og:title" content="BackupCraft - Minecraft Backup Tool" />
+    <meta
+      property="og:description"
+      content="Protect your Minecraft worlds with automated backups. 100% free, safe and open-source."
+    />
+    <meta
+      property="og:image"
+      content="https://synthx7.github.io/BackupCraft/webpage/assets/BC_logo.png"
+    />
+    <meta property="og:url" content="https://synthx7.github.io/BackupCraft/" />
+    <meta property="og:type" content="website" />
+
     <title>BackupCraft - Changelog</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
+    <link rel="stylesheet" href="styles/styles.css" />
+    <link rel="stylesheet" href="styles/loader.css" />
+    <link rel="stylesheet" href="styles/changelog.css" />
+    <link rel="icon" href="assets/flavicon.ico" type="image/x-icon" />
+  </head>
+  <body>
+    <div id="loader">
+      <img src="assets/loader.gif" alt="Loading..." class="loader-gif" />
+      <p id="loader-text"></p>
+    </div>
+
     <header>
-        <nav role="navigation" aria-label="Main navigation">
-            <a href="index.html">Home</a>
-            <a href="install.html">Install</a>
-            <a href="docs.html">Docs</a>
-            <a href="changelog.html" aria-current="page" class="active">Changelog</a>
-            <a href="contact.html">Contact</a>
-        </nav>
+      <nav role="navigation" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a href="install.html">Install</a>
+        <a href="docs.html">Docs</a>
+        <a href="changelog.html" aria-current="page" class="active"
+          >Changelog</a
+        >
+        <a href="contact.html">Contact</a>
+      </nav>
     </header>
     <main>
-        <section class="hero">
-            <h1>Changelog</h1>
-            <p>Track the latest updates and improvements to BackupCraft.</p>
-        </section>
-        <nav class="breadcrumbs">
-            <a href="index.html">Home</a> > <a href="changelog.html">Changelog</a>
-        </nav>
-        <section class="content-grid">
-            <div class="content-card">
-                <table>
-                    <tr>
-                        <th>Version</th>
-                        <th>Date</th>
-                        <th>Changes</th>
-                    </tr>
-                    <tr>
-                        <td>v1.6.3</td>
-                        <td>2025-07-01</td>
-                        <td>
-                            <ul>
-                                <li>Added backup performance modes: minimum, medium, maximum.</li>
-                                <li>Improved FPS performance during backup.</li>
-                                <li>Fixed bug with hidden backup optimization.</li>
-                                <li>Backup achievements handling improved.</li>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>v1.6.2</td>
-                        <td>2025-06-15</td>
-                        <td>
-                            <ul>
-                                <li>Introduced backup automatic scheduling.</li>
-                                <li>Added configuration file support.</li>
-                                <li>Basic UI improvements.</li>
-                            </ul>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>v1.6.1</td>
-                        <td>2025-06-01</td>
-                        <td>
-                            <ul>
-                                <li>Initial public release.</li>
-                                <li>Supports basic manual backups and restores.</li>
-                            </ul>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </section>
+      <section class="hero">
+        <h1>Changelog</h1>
+        <p>Track the latest updates and improvements to BackupCraft.</p>
+      </section>
+      <section class="content-grid">
+        <!---------------------------------------------------------------------------------------->
+
+        <div class="content-card changelog-entry">
+          <h2>v1.6.3 <span class="date">2025-07-01</span></h2>
+          <ul>
+            <li>
+              Optimizations in automatic backup (configurable in auto backup
+              settings)
+            </li>
+            <li>
+              New loading bar
+            </li>
+            <cite>
+              Spoiler: English, Windows and Python... coming soon!
+            </cite>
+          </ul>
+        </div>
+
+        <!---------------------------------------------------------------------------------------->
+
+        <div class="content-card changelog-entry">
+          <h2>v1.6.2 <span class="date">2025-06-15</span></h2>
+          <ul>
+            <li>
+              Bug fixed: Manual backup was not correctly locating the world.
+            </li>
+            <li>
+              New file: devtool.sh is intended solely to simplify version
+              switching (available only on GitHub repository).
+            </li>
+            <li>
+              Performance improvements: Slight improvement in automatic backup
+              performance, which previously degraded the performance of any
+              other running task.
+            </li>
+          </ul>
+        </div>
+
+        <!---------------------------------------------------------------------------------------->
+
+        <div class="content-card changelog-entry">
+          <h2>v1.6.1 <span class="date">2025-06-01</span></h2>
+          <ul>
+            <li>
+              Previously, if you ran install.sh with sudo, it would save the
+              main script in /home/root instead of the user's home directory.
+              (Fixed!)
+            </li>
+            <li>
+              Supports basic manual backups and restores.
+            </li>
+          </ul>
+        </div>
+
+        <!---------------------------------------------------------------------------------------->
+      </section>
     </main>
     <footer>
-        <p>© 2025 Syntax Echonomics. All rights reserved.</p>
-        <div class="social-links">
-            <a href="#" target="_blank" rel="noopener">Discord</a>
-            <a href="#" target="_blank" rel="noopener">Reddit</a>
-            <a href="#" target="_blank" rel="noopener">Instagram</a>
-            <a href="#" target="_blank" rel="noopener">TikTok</a>
-        </div>
+      <p>© 2025 Syntax Echonomics. All rights reserved.</p>
+      <div class="social-links">
+        <a href="#" target="_blank" rel="noopener">Instagram</a>
+      </div>
     </footer>
-</body>
+    <script src="scripts/loader.js"></script>
+  </body>
 </html>
