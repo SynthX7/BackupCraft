@@ -19,7 +19,7 @@ O **BackupCraft** é uma ferramenta de terminal simples e eficaz para fazer back
 ⚠️ **Atenção:** versões anteriores à v1.6.0 não são recomendadas para uso devido a bugs graves que podem causar falhas ou até danos ao computador.  
 As versões suportadas oficialmente são da v1.6.0 em diante.
 
-Visite o [nosso site](https://synthx7.github.io/BackupCraft/webpage/) para mais informações.
+Visite o [nosso site](https://backupcraft.netlify.app/) para mais informações.
 
 ---
 
