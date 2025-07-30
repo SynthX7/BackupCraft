@@ -39,5 +39,8 @@ Você pode ajudar de várias formas:
 - Traduzindo para outros idiomas
 
 Envie um Pull Request ou abra uma Issue com sua sugestão!
-
+---
+### Contador de Visitas!
+![BackupCraft Visit Count](https://count.getloli.com/@synthx7?name=backupcraft&theme=minecraft&padding=8&offset=0&align=top&scale=2&pixelated=1&darkmode=1)
+---
 > A marca e estilo visual do Minecraft pertencem à Mojang Studios/Microsoft. O projeto BackupCraft é independente e não possui afiliação oficial.
