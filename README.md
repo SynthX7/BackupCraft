@@ -41,6 +41,6 @@ You can help in several ways:
 Submit a Pull Request or open an Issue with your suggestion!
 ---
 ### Visit Count!
-https://count.getloli.com/@synthx7?name=backupcraft&theme=minecraft&padding=8&offset=0&align=top&scale=2&pixelated=1&darkmode=1
+![BackupCraft Visit Count](https://count.getloli.com/@synthx7?name=backupcraft&theme=minecraft&padding=8&offset=0&align=top&scale=2&pixelated=1&darkmode=1)
 ---
 > The Minecraft brand and visual style belong to Mojang Studios/Microsoft. The BackupCraft project is independent and has no official affiliation.
